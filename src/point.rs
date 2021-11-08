@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::ops::{Add, Neg, Sub};
 
 use crate::{utils::equal::equal, vector::Vector};
 
@@ -38,6 +38,45 @@ impl Add<Vector> for Point {
     }
 }
 
+impl Sub for Point {
+    type Output = Vector;
+
+    fn sub(self, other: Point) -> Vector {
+        Vector {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+            w: self.w - other.w,
+        }
+    }
+}
+
+impl Sub<Vector> for Point {
+    type Output = Self;
+
+    fn sub(self, other: Vector) -> Self {
+        Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+            w: self.w - other.w,
+        }
+    }
+}
+
+impl Neg for Point {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Self {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+            w: -self.w,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::{point::Point, vector::Vector};
@@ -64,15 +103,50 @@ mod tests {
 
     #[test]
     fn adding_point_and_vector() {
-        let point = Point::new(3.0, -2.0, 5.0);
-        let vector = Vector::new(-2.0, 3.0, 1.0);
+        let p = Point::new(3.0, -2.0, 5.0);
+        let v = Vector::new(-2.0, 3.0, 1.0);
         assert_eq!(
-            point + vector,
+            p + v,
             Point {
                 x: 1.0,
                 y: 1.0,
                 z: 6.0,
                 w: 1.0
+            }
+        );
+    }
+
+    #[test]
+    fn subtracting_two_points() {
+        let p1 = Point::new(3.0, 2.0, 1.0);
+        let p2 = Point::new(5.0, 6.0, 7.0);
+
+        assert_eq!(p1 - p2, Vector::new(-2.0, -4.0, -6.0));
+    }
+
+    #[test]
+    fn subtracting_a_vector_from_a_point() {
+        let p = Point::new(3.0, 2.0, 1.0);
+        let v = Vector::new(5.0, 6.0, 7.0);
+
+        assert_eq!(p - v, Point::new(-2.0, -4.0, -6.0));
+    }
+
+    #[test]
+    fn negating_a_point() {
+        let v = Point {
+            x: 1.0,
+            y: -2.0,
+            z: 3.0,
+            w: -4.0,
+        };
+        assert_eq!(
+            -v,
+            Point {
+                x: -1.0,
+                y: 2.0,
+                z: -3.0,
+                w: 4.0,
             }
         );
     }

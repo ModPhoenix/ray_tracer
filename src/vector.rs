@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::ops::{Add, Neg, Sub};
 
 use crate::{point::Point, utils::equal::equal};
 
@@ -52,6 +52,32 @@ impl Add<Point> for Vector {
     }
 }
 
+impl Sub for Vector {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+            w: self.w - other.w,
+        }
+    }
+}
+
+impl Neg for Vector {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Self {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+            w: -self.w,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::{point::Point, vector::Vector};
@@ -79,10 +105,10 @@ mod tests {
 
     #[test]
     fn adding_two_vectors() {
-        let vector1 = Vector::new(3.0, -2.0, 5.0);
-        let vector2 = Vector::new(-2.0, 3.0, 1.0);
+        let v1 = Vector::new(3.0, -2.0, 5.0);
+        let v2 = Vector::new(-2.0, 3.0, 1.0);
         assert_eq!(
-            vector1 + vector2,
+            v1 + v2,
             Vector {
                 x: 1.0,
                 y: 1.0,
@@ -94,15 +120,41 @@ mod tests {
 
     #[test]
     fn adding_vector_and_point() {
-        let vector = Vector::new(3.0, -2.0, 5.0);
-        let point = Point::new(-2.0, 3.0, 1.0);
+        let v = Vector::new(3.0, -2.0, 5.0);
+        let p = Point::new(-2.0, 3.0, 1.0);
         assert_eq!(
-            vector + point,
+            v + p,
             Vector {
                 x: 1.0,
                 y: 1.0,
                 z: 6.0,
                 w: 1.0
+            }
+        );
+    }
+
+    #[test]
+    fn subtracting_two_vectors() {
+        let v1 = Vector::new(3.0, 2.0, 1.0);
+        let v2 = Vector::new(5.0, 6.0, 7.0);
+        assert_eq!(v1 - v2, Vector::new(-2.0, -4.0, -6.0));
+    }
+
+    #[test]
+    fn negating_a_vector() {
+        let v = Vector {
+            x: 1.0,
+            y: -2.0,
+            z: 3.0,
+            w: -4.0,
+        };
+        assert_eq!(
+            -v,
+            Vector {
+                x: -1.0,
+                y: 2.0,
+                z: -3.0,
+                w: 4.0,
             }
         );
     }
