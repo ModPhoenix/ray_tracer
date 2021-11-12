@@ -30,6 +30,10 @@ impl Tuple {
     pub fn is_vector(&self) -> bool {
         self.w == 0.0
     }
+
+    pub fn magnitude(&self) -> f64 {
+        (self.x.powf(2.0) + self.y.powf(2.0) + self.z.powf(2.0) + self.w.powf(2.0)).sqrt()
+    }
 }
 
 impl PartialEq for Tuple {
@@ -198,5 +202,33 @@ mod tests {
         let a = Tuple::new(1.0, -2.0, 3.0, -4.0);
 
         assert_eq!(a / 2.0, Tuple::new(0.5, -1.0, 1.5, -2.0));
+    }
+
+    #[test]
+    fn computing_the_magnitude_of_vector_1_0_0() {
+        let v = Tuple::vector(1.0, 0.0, 0.0);
+
+        assert_eq!(v.magnitude(), 1.0);
+    }
+
+    #[test]
+    fn computing_the_magnitude_of_vector_0_1_0() {
+        let v = Tuple::vector(0.0, 1.0, 0.0);
+
+        assert_eq!(v.magnitude(), 1.0);
+    }
+
+    #[test]
+    fn computing_the_magnitude_of_vector_1_2_3() {
+        let v = Tuple::vector(1.0, 2.0, 3.0);
+
+        assert_eq!(v.magnitude(), 14.0_f64.sqrt());
+    }
+
+    #[test]
+    fn computing_the_magnitude_of_vector_m1_m2_m3() {
+        let v = Tuple::vector(-1.0, -2.0, -3.0);
+
+        assert_eq!(v.magnitude(), 14.0_f64.sqrt());
     }
 }
