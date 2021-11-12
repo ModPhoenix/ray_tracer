@@ -1,4 +1,3 @@
 mod constants;
-mod point;
+mod tuple;
 mod utils;
-mod vector;
