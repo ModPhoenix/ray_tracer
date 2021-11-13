@@ -45,6 +45,18 @@ impl Tuple {
             w: self.w / magnitude,
         }
     }
+
+    pub fn dot(a: &Tuple, b: &Tuple) -> f64 {
+        (a.x * b.x) + (a.y * b.y) + (a.z * b.z) + (a.w * b.w)
+    }
+
+    pub fn cross(a: &Tuple, b: &Tuple) -> Self {
+        Self::vector(
+            a.y * b.z - a.z * b.y,
+            a.z * b.x - a.x * b.z,
+            a.x * b.y - a.y * b.x,
+        )
+    }
 }
 
 impl PartialEq for Tuple {
@@ -263,5 +275,22 @@ mod tests {
         let norm = v.normalize();
 
         assert_eq!(norm.magnitude(), 1.0);
+    }
+
+    #[test]
+    fn the_dot_product_of_two_tuples() {
+        let a = Tuple::vector(1.0, 2.0, 3.0);
+        let b = Tuple::vector(2.0, 3.0, 4.0);
+
+        assert_eq!(Tuple::dot(&a, &b), 20.0);
+    }
+
+    #[test]
+    fn the_cross_product_of_two_vectors() {
+        let a = Tuple::vector(1.0, 2.0, 3.0);
+        let b = Tuple::vector(2.0, 3.0, 4.0);
+
+        assert_eq!(Tuple::cross(&a, &b), Tuple::vector(-1.0, 2.0, -1.0));
+        assert_eq!(Tuple::cross(&b, &a), Tuple::vector(1.0, -2.0, 1.0));
     }
 }
