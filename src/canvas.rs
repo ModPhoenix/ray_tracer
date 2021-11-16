@@ -56,34 +56,55 @@ impl Canvas {
         for y in 0..self.height {
             for x in 0..self.width {
                 let rgb = self.get(x, y).rgb();
-                let rgb_ppm_pixel = format!("{} {} {} ", rgb.0, rgb.1, rgb.2);
+                let red = rgb.red.to_string();
+                let green = rgb.green.to_string();
+                let blue = rgb.blue.to_string();
 
-                println!("line_len {}", line_len);
-                println!("rgb_ppm_pixel.len() {}", rgb_ppm_pixel.len());
-                println!("MAX {}", line_len + rgb_ppm_pixel.len());
-
-                if line_len + rgb_ppm_pixel.len() >= 70 {
-                    body.pop();
-                    body.push('\n');
-                    line_len = 0;
-                }
-
-                if x == 0 {
-                    line_len = 0;
+                if line_len + red.len() >= 70 {
+                    let str = format!("{}{}", '\n', red);
+                    body.push_str(&str);
+                    line_len = red.len();
                 } else {
-                    line_len = line_len + rgb_ppm_pixel.len();
+                    let str: String = if x == 0 {
+                        red
+                    } else {
+                        format!("{}{}", ' ', red)
+                    };
+
+                    body.push_str(&str);
+                    line_len = line_len + str.len();
                 }
 
-                body.push_str(&rgb_ppm_pixel);
+                if line_len + green.len() >= 70 {
+                    let str = format!("{}{}", '\n', green);
+                    body.push_str(&str);
+                    line_len = green.len();
+                } else {
+                    let str = format!("{}{}", ' ', green);
+                    body.push_str(&str);
+                    line_len = line_len + str.len();
+                }
 
-                if x == self.width - 1 && body.ends_with(' ') {
-                    body.pop();
+                if line_len + blue.len() >= 70 {
+                    let str = format!("{}{}", '\n', blue);
+                    body.push_str(&str);
+                    line_len = blue.len();
+                } else {
+                    let str = format!("{}{}", ' ', blue);
+                    body.push_str(&str);
+                    line_len = line_len + str.len();
+                }
+
+                if x == self.width - 1 {
                     body.push('\n');
+                    line_len = 0;
                 }
             }
         }
 
-        println!("body {}", body);
+        if body.starts_with(' ') {
+            body.pop();
+        }
 
         header + &body
     }

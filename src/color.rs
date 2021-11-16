@@ -1,6 +1,6 @@
 use std::ops::{Add, Mul, Sub};
 
-use crate::{types::RGB, utils::equal::equal};
+use crate::{utils::equal::equal, RGB::RGB};
 
 #[derive(Debug, Clone)]
 pub struct Color {
@@ -23,7 +23,7 @@ impl Color {
     }
 
     pub fn rgb(&self) -> RGB {
-        (
+        RGB::new(
             Self::value_to_rgb(self.red),
             Self::value_to_rgb(self.green),
             Self::value_to_rgb(self.blue),
