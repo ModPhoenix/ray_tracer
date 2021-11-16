@@ -1,8 +1,8 @@
 use std::ops::{Add, Mul, Sub};
 
-use crate::utils::equal::equal;
+use crate::{types::RGB, utils::equal::equal};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Color {
     pub red: f64,
     pub green: f64,
@@ -10,8 +10,36 @@ pub struct Color {
 }
 
 impl Color {
-    fn new(red: f64, green: f64, blue: f64) -> Self {
+    pub fn new(red: f64, green: f64, blue: f64) -> Self {
         Self { red, green, blue }
+    }
+
+    pub fn new_black() -> Self {
+        Self {
+            red: 0.0,
+            green: 0.0,
+            blue: 0.0,
+        }
+    }
+
+    pub fn rgb(&self) -> RGB {
+        (
+            Self::value_to_rgb(self.red),
+            Self::value_to_rgb(self.green),
+            Self::value_to_rgb(self.blue),
+        )
+    }
+
+    fn clamp(x: f64) -> f64 {
+        match x {
+            x if x > 1.0 => 1.0,
+            x if x < 0.0 => 0.0,
+            _ => x,
+        }
+    }
+
+    fn value_to_rgb(value: f64) -> u8 {
+        (Self::clamp(value) * 255.0).round() as u8
     }
 }
 
@@ -111,5 +139,12 @@ mod tests {
         let c2 = Color::new(0.9, 1.0, 0.1);
 
         assert_eq!(c1 * c2, Color::new(0.9, 0.2, 0.04));
+    }
+
+    #[test]
+    fn create_new_black_color() {
+        let c = Color::new_black();
+
+        assert_eq!(c, Color::new(0.0, 0.0, 0.0));
     }
 }
