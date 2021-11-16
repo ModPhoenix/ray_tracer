@@ -1,4 +1,7 @@
-use ray_tracer::tuple::Tuple;
+use std::fs::File;
+use std::io::prelude::*;
+
+use ray_tracer::{canvas::Canvas, color::Color, tuple::Tuple};
 
 #[derive(Debug, Clone)]
 
@@ -21,15 +24,17 @@ fn tick(env: Environment, proj: Projectile) -> Projectile {
     Projectile { position, velocity }
 }
 
-fn main() {
+fn main() -> std::io::Result<()> {
+    let mut canvas = Canvas::new(900, 550);
+    let point_color = Color::new(1.0, 0.0, 1.0);
     let environment = Environment {
         gravity: Tuple::vector(0.0, -0.1, 0.0),
-        wind: Tuple::vector(-0.01, 0.0, 0.0),
+        wind: Tuple::vector(-0.05, 0.0, 0.0),
     };
 
     let mut projectile = Projectile {
         position: Tuple::point(0.0, 1.0, 0.0),
-        velocity: Tuple::vector(1.0, 1.0, 0.0).normalize(),
+        velocity: Tuple::vector(1.0, 1.0, 0.0).normalize() * 11.25,
     };
 
     let mut count = 0u32;
@@ -39,10 +44,22 @@ fn main() {
 
         projectile = tick(environment.clone(), projectile.clone());
 
-        println!("tick: {}, projectile: {:#?}", count, &projectile);
-
-        if projectile.position.y <= 0.0 {
+        if projectile.position.y <= 0.0 || projectile.position.x as usize >= canvas.width {
             break;
         }
+
+        println!("position.y: {}", projectile.position.y);
+        println!("position.x: {}", projectile.position.x);
+
+        canvas.set(
+            canvas.width - projectile.position.x.clone() as usize,
+            canvas.height - projectile.position.y.clone() as usize,
+            &point_color,
+        );
     }
+
+    let mut file = File::create("output.ppm")?;
+    file.write_all(&canvas.to_ppm().as_bytes())?;
+
+    Ok(())
 }

@@ -2,13 +2,13 @@ use crate::color::Color;
 
 #[derive(Debug)]
 pub struct Canvas {
-    width: usize,
-    height: usize,
+    pub width: usize,
+    pub height: usize,
     pixels: Vec<Color>,
 }
 
 impl Canvas {
-    fn new(width: usize, height: usize) -> Self {
+    pub fn new(width: usize, height: usize) -> Self {
         Self {
             width,
             height,
@@ -16,7 +16,7 @@ impl Canvas {
         }
     }
 
-    fn new_with_color(width: usize, height: usize, color: Color) -> Self {
+    pub fn new_with_color(width: usize, height: usize, color: Color) -> Self {
         Self {
             width,
             height,
@@ -37,7 +37,7 @@ impl Canvas {
         y * self.width + x
     }
 
-    fn for_each<F>(&self, func: F)
+    pub fn for_each<F>(&self, func: F)
     where
         F: Fn(usize, usize),
     {
@@ -48,7 +48,7 @@ impl Canvas {
         }
     }
 
-    fn to_ppm(&self) -> String {
+    pub fn to_ppm(&self) -> String {
         let header = format!("P3\n{} {}\n255\n", self.width, self.height);
         let mut body = String::new();
         let mut line_len = 0;
