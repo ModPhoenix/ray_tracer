@@ -1,6 +1,6 @@
 use std::ops::{Add, Mul, Sub};
 
-use crate::{utils::equal::equal, RGB::RGB};
+use crate::{rgb::RGB, utils::equal::equal};
 
 #[derive(Debug, Clone)]
 pub struct Color {

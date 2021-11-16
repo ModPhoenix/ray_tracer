@@ -1,6 +1,6 @@
-mod RGB;
-mod canvas;
-mod color;
-mod constants;
-mod tuple;
-mod utils;
+pub mod canvas;
+pub mod color;
+pub mod constants;
+pub mod rgb;
+pub mod tuple;
+pub mod utils;

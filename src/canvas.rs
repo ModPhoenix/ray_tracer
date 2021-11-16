@@ -192,4 +192,12 @@ mod tests {
         );
         assert_eq!(lines.next(), None);
     }
+
+    #[test]
+    fn ppm_files_are_terminated_by_a_newline_character() {
+        let c = Canvas::new(5, 3);
+        let ppm = c.to_ppm();
+
+        assert!(ppm.ends_with('\n'));
+    }
 }
