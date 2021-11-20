@@ -73,6 +73,16 @@ impl Matrix<3> {
     pub fn minor(&self, row: usize, col: usize) -> f64 {
         self.get_submatrix(row, col).determinant()
     }
+
+    pub fn cofactor(&self, row: usize, col: usize) -> f64 {
+        let result = self.minor(row, col);
+
+        if (row + col) % 2 == 0 {
+            result
+        } else {
+            -result
+        }
+    }
 }
 
 impl Matrix<2> {
@@ -374,5 +384,30 @@ mod tests {
 
         assert_eq!(b.determinant(), 25.);
         assert_eq!(a.minor(1, 0), 25.);
+    }
+
+    // Scenario: Calculating a cofactor of a 3x3 matrix
+    // Given the following 3x3 matrix A:
+    // |3|5|0|
+    // | 2|-1|-7|
+    // | 6|-1| 5|
+    // Then minor(A, 0, 0) = -12
+    // And cofactor(A, 0, 0) = -12
+    // And minor(A, 1, 0) = 25
+    // And cofactor(A, 1, 0) = -25
+
+    #[test]
+    fn calculating_a_cofactor_of_a_3x3_matrix() {
+        #[rustfmt::skip]
+        let a = Matrix::from([
+            [3.,  5.,  0.],
+            [2., -1., -7.],
+            [6., -1.,  5.],
+        ]);
+
+        assert_eq!(a.minor(0, 0), -12.);
+        assert_eq!(a.cofactor(0, 0), -12.);
+        assert_eq!(a.minor(1, 0), 25.);
+        assert_eq!(a.cofactor(1, 0), -25.);
     }
 }
