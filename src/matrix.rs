@@ -63,15 +63,9 @@ impl Matrix<4> {
     pub fn submatrix(&self, remove_row: usize, remove_col: usize) -> Matrix<3> {
         self.get_submatrix(remove_row, remove_col)
     }
-}
-
-impl Matrix<3> {
-    pub fn submatrix(&self, remove_row: usize, remove_col: usize) -> Matrix<2> {
-        self.get_submatrix(remove_row, remove_col)
-    }
 
     pub fn minor(&self, row: usize, col: usize) -> f64 {
-        self.get_submatrix(row, col).determinant()
+        self.submatrix(row, col).determinant()
     }
 
     pub fn cofactor(&self, row: usize, col: usize) -> f64 {
@@ -82,6 +76,46 @@ impl Matrix<3> {
         } else {
             -result
         }
+    }
+
+    fn determinant(&self) -> f64 {
+        let mut det = 0.;
+
+        for col in 0..4 {
+            det += self[0][col] * self.cofactor(0, col);
+        }
+
+        det
+    }
+}
+
+impl Matrix<3> {
+    pub fn submatrix(&self, remove_row: usize, remove_col: usize) -> Matrix<2> {
+        self.get_submatrix(remove_row, remove_col)
+    }
+
+    pub fn minor(&self, row: usize, col: usize) -> f64 {
+        self.submatrix(row, col).determinant()
+    }
+
+    pub fn cofactor(&self, row: usize, col: usize) -> f64 {
+        let result = self.minor(row, col);
+
+        if (row + col) % 2 == 0 {
+            result
+        } else {
+            -result
+        }
+    }
+
+    fn determinant(&self) -> f64 {
+        let mut det = 0.;
+
+        for col in 0..3 {
+            det += self[0][col] * self.cofactor(0, col);
+        }
+
+        det
     }
 }
 
@@ -386,16 +420,6 @@ mod tests {
         assert_eq!(a.minor(1, 0), 25.);
     }
 
-    // Scenario: Calculating a cofactor of a 3x3 matrix
-    // Given the following 3x3 matrix A:
-    // |3|5|0|
-    // | 2|-1|-7|
-    // | 6|-1| 5|
-    // Then minor(A, 0, 0) = -12
-    // And cofactor(A, 0, 0) = -12
-    // And minor(A, 1, 0) = 25
-    // And cofactor(A, 1, 0) = -25
-
     #[test]
     fn calculating_a_cofactor_of_a_3x3_matrix() {
         #[rustfmt::skip]
@@ -409,5 +433,37 @@ mod tests {
         assert_eq!(a.cofactor(0, 0), -12.);
         assert_eq!(a.minor(1, 0), 25.);
         assert_eq!(a.cofactor(1, 0), -25.);
+    }
+
+    #[test]
+    fn calculating_the_determinant_of_a_3x3_matrix() {
+        #[rustfmt::skip]
+        let a = Matrix::from([
+            [ 1., 2.,  6.],
+            [-5., 8., -4.],
+            [ 2., 6.,  4.],
+        ]);
+
+        assert_eq!(a.cofactor(0, 0), 56.);
+        assert_eq!(a.cofactor(0, 1), 12.);
+        assert_eq!(a.cofactor(0, 2), -46.);
+        assert_eq!(a.determinant(), -196.);
+    }
+
+    #[test]
+    fn calculating_the_determinant_of_a_4x4_matrix() {
+        #[rustfmt::skip]
+        let a = Matrix::from([
+            [-2., -8.,  3.,  5.],
+            [-3.,  1.,  7.,  3.],
+            [ 1.,  2., -9.,  6.],
+            [-6.,  7.,  7., -9.],
+        ]);
+
+        assert_eq!(a.cofactor(0, 0), 690.);
+        assert_eq!(a.cofactor(0, 1), 447.);
+        assert_eq!(a.cofactor(0, 2), 210.);
+        assert_eq!(a.cofactor(0, 3), 51.);
+        assert_eq!(a.determinant(), -4071.);
     }
 }
