@@ -69,6 +69,10 @@ impl Matrix<3> {
     pub fn submatrix(&self, remove_row: usize, remove_col: usize) -> Matrix<2> {
         self.get_submatrix(remove_row, remove_col)
     }
+
+    pub fn minor(&self, row: usize, col: usize) -> f64 {
+        self.get_submatrix(row, col).determinant()
+    }
 }
 
 impl Matrix<2> {
@@ -355,5 +359,20 @@ mod tests {
             [-8.,  8., 6.],
             [-7., -1., 1.]
         ]));
+    }
+
+    #[test]
+    fn calculating_a_minor_of_a_3x3_matrix() {
+        #[rustfmt::skip]
+        let a = Matrix::from([
+            [3.,  5.,  0.],
+            [2., -1., -7.],
+            [6., -1.,  5.],
+        ]);
+
+        let b = a.submatrix(1, 0);
+
+        assert_eq!(b.determinant(), 25.);
+        assert_eq!(a.minor(1, 0), 25.);
     }
 }
