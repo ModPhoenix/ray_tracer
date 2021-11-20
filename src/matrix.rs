@@ -87,6 +87,10 @@ impl Matrix<4> {
 
         det
     }
+
+    fn is_invertible(&self) -> bool {
+        self.determinant() != 0.
+    }
 }
 
 impl Matrix<3> {
@@ -465,5 +469,33 @@ mod tests {
         assert_eq!(a.cofactor(0, 2), 210.);
         assert_eq!(a.cofactor(0, 3), 51.);
         assert_eq!(a.determinant(), -4071.);
+    }
+
+    #[test]
+    fn testing_an_invertible_matrix_for_invertibility() {
+        #[rustfmt::skip]
+        let a = Matrix::from([
+            [6.,  4., 4.,  4.],
+            [5.,  5., 7.,  6.],
+            [4., -9., 3., -7.],
+            [9.,  1., 7., -6.],
+        ]);
+
+        assert_eq!(a.determinant(), -2120.);
+        assert!(a.is_invertible());
+    }
+
+    #[test]
+    fn testing_a_noninvertible_matrix_for_invertibility() {
+        #[rustfmt::skip]
+        let a = Matrix::from([
+            [-4.,  2., -2., -3.],
+            [ 9.,  6.,  2.,  6.],
+            [ 0., -5.,  1., -5.],
+            [ 0.,  0.,  0.,  0.],
+        ]);
+
+        assert_eq!(a.determinant(), 0.);
+        assert!(!a.is_invertible());
     }
 }
