@@ -110,6 +110,14 @@ impl Matrix<4> {
 
         result
     }
+
+    fn translation(mut self, x: f64, y: f64, z: f64) -> Self {
+        self[0][3] = x;
+        self[1][3] = y;
+        self[2][3] = z;
+
+        self
+    }
 }
 
 impl Matrix<3> {
@@ -618,5 +626,30 @@ mod tests {
         let c = a.clone() * b.clone();
 
         assert_eq!(c * b.inverse(), a);
+    }
+
+    #[test]
+    fn multiplying_by_a_translation_matrix() {
+        let transform = Matrix::identity().translation(5., -3., 2.);
+        let p = Tuple::point(-3., 4., 5.);
+
+        assert_eq!(transform * p, Tuple::point(2., 1., 7.));
+    }
+
+    #[test]
+    fn multiplying_by_the_inverse_of_a_translation_matrix() {
+        let transform = Matrix::identity().translation(5., -3., 2.);
+        let inv = transform.inverse();
+        let p = Tuple::point(-3., 4., 5.);
+
+        assert_eq!(inv * p, Tuple::point(-8., 7., 3.));
+    }
+
+    #[test]
+    fn translation_does_not_affect_vectors() {
+        let transform = Matrix::identity().translation(5., -3., 2.);
+        let v = Tuple::vector(-3., 4., 5.);
+
+        assert_eq!(transform * v.clone(), v);
     }
 }
