@@ -144,6 +144,15 @@ impl Matrix<4> {
 
         self
     }
+
+    fn rotation_z(mut self, radians: f64) -> Self {
+        self[0][0] = radians.cos();
+        self[0][1] = -radians.sin();
+        self[1][0] = radians.sin();
+        self[1][1] = radians.cos();
+
+        self
+    }
 }
 
 impl Matrix<3> {
@@ -752,5 +761,19 @@ mod tests {
             Tuple::point(2.0_f64.sqrt() / 2., 0., 2.0_f64.sqrt() / 2.)
         );
         assert_eq!(full_quarter * p, Tuple::point(1., 0., 0.));
+    }
+
+    #[test]
+    fn rotating_a_point_around_the_z_axis() {
+        let p = Tuple::point(0., 1., 0.);
+
+        let half_quarter = Matrix::identity().rotation_z(PI / 4.);
+        let full_quarter = Matrix::identity().rotation_z(PI / 2.);
+
+        assert_eq!(
+            half_quarter * p.clone(),
+            Tuple::point(-2.0_f64.sqrt() / 2., 2.0_f64.sqrt() / 2., 0.)
+        );
+        assert_eq!(full_quarter * p, Tuple::point(-1., 0., 0.));
     }
 }
