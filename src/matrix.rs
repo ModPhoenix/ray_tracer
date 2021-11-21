@@ -153,6 +153,17 @@ impl Matrix<4> {
 
         self
     }
+
+    fn shearing(mut self, xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Self {
+        self[0][1] = xy;
+        self[0][2] = xz;
+        self[1][0] = yx;
+        self[1][2] = yz;
+        self[2][0] = zx;
+        self[2][1] = zy;
+
+        self
+    }
 }
 
 impl Matrix<3> {
@@ -775,5 +786,53 @@ mod tests {
             Tuple::point(-2.0_f64.sqrt() / 2., 2.0_f64.sqrt() / 2., 0.)
         );
         assert_eq!(full_quarter * p, Tuple::point(-1., 0., 0.));
+    }
+
+    #[test]
+    fn a_shearing_transformation_moves_x_in_proportion_to_y() {
+        let transform = Matrix::identity().shearing(1., 0., 0., 0., 0., 0.);
+        let p = Tuple::point(2., 3., 4.);
+
+        assert_eq!(transform * p, Tuple::point(5., 3., 4.));
+    }
+
+    #[test]
+    fn a_shearing_transformation_moves_x_in_proportion_to_z() {
+        let transform = Matrix::identity().shearing(0., 1., 0., 0., 0., 0.);
+        let p = Tuple::point(2., 3., 4.);
+
+        assert_eq!(transform * p, Tuple::point(6., 3., 4.));
+    }
+
+    #[test]
+    fn a_shearing_transformation_moves_y_in_proportion_to_x() {
+        let transform = Matrix::identity().shearing(0., 0., 1., 0., 0., 0.);
+        let p = Tuple::point(2., 3., 4.);
+
+        assert_eq!(transform * p, Tuple::point(2., 5., 4.));
+    }
+
+    #[test]
+    fn a_shearing_transformation_moves_y_in_proportion_to_z() {
+        let transform = Matrix::identity().shearing(0., 0., 0., 1., 0., 0.);
+        let p = Tuple::point(2., 3., 4.);
+
+        assert_eq!(transform * p, Tuple::point(2., 7., 4.));
+    }
+
+    #[test]
+    fn a_shearing_transformation_moves_z_in_proportion_to_x() {
+        let transform = Matrix::identity().shearing(0., 0., 0., 0., 1., 0.);
+        let p = Tuple::point(2., 3., 4.);
+
+        assert_eq!(transform * p, Tuple::point(2., 3., 6.));
+    }
+
+    #[test]
+    fn a_shearing_transformation_moves_z_in_proportion_to_y() {
+        let transform = Matrix::identity().shearing(0., 0., 0., 0., 0., 1.);
+        let p = Tuple::point(2., 3., 4.);
+
+        assert_eq!(transform * p, Tuple::point(2., 3., 7.));
     }
 }
