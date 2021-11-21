@@ -118,6 +118,14 @@ impl Matrix<4> {
 
         self
     }
+
+    fn scaling(mut self, x: f64, y: f64, z: f64) -> Self {
+        self[0][0] = x;
+        self[1][1] = y;
+        self[2][2] = z;
+
+        self
+    }
 }
 
 impl Matrix<3> {
@@ -651,5 +659,37 @@ mod tests {
         let v = Tuple::vector(-3., 4., 5.);
 
         assert_eq!(transform * v.clone(), v);
+    }
+
+    #[test]
+    fn a_scaling_matrix_applied_to_a_point() {
+        let transform = Matrix::identity().scaling(2., 3., 4.);
+        let p = Tuple::point(-4., 6., 8.);
+
+        assert_eq!(transform * p, Tuple::point(-8., 18., 32.));
+    }
+
+    #[test]
+    fn a_scaling_matrix_applied_to_a_vector() {
+        let transform = Matrix::identity().scaling(2., 3., 4.);
+        let v = Tuple::vector(-4., 6., 8.);
+
+        assert_eq!(transform * v, Tuple::vector(-8., 18., 32.));
+    }
+
+    #[test]
+    fn multiplying_by_the_inverse_of_a_scaling_matrix() {
+        let inv = Matrix::identity().scaling(2., 3., 4.).inverse();
+        let v = Tuple::vector(-4., 6., 8.);
+
+        assert_eq!(inv * v, Tuple::vector(-2., 2., 2.));
+    }
+
+    #[test]
+    fn reflection_is_scaling_by_a_negative_value() {
+        let transform = Matrix::identity().scaling(-1., 1., 1.);
+        let p = Tuple::point(2., 3., 4.);
+
+        assert_eq!(transform * p, Tuple::point(-2., 3., 4.));
     }
 }
