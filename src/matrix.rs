@@ -126,6 +126,15 @@ impl Matrix<4> {
 
         self
     }
+
+    fn rotation_x(mut self, radians: f64) -> Self {
+        self[1][1] = radians.cos();
+        self[1][2] = -radians.sin();
+        self[2][1] = radians.sin();
+        self[2][2] = radians.cos();
+
+        self
+    }
 }
 
 impl Matrix<3> {
@@ -231,6 +240,8 @@ impl Mul<Tuple> for Matrix<4> {
 
 #[cfg(test)]
 mod tests {
+    use std::f64::consts::PI;
+
     use crate::{matrix::Matrix, tuple::Tuple};
 
     #[test]
@@ -691,5 +702,32 @@ mod tests {
         let p = Tuple::point(2., 3., 4.);
 
         assert_eq!(transform * p, Tuple::point(-2., 3., 4.));
+    }
+
+    #[test]
+    fn rotating_a_point_around_the_x_axis() {
+        let p = Tuple::point(0., 1., 0.);
+
+        let half_quarter = Matrix::identity().rotation_x(PI / 4.);
+        let full_quarter = Matrix::identity().rotation_x(PI / 2.);
+
+        assert_eq!(
+            half_quarter * p.clone(),
+            Tuple::point(0., 2.0_f64.sqrt() / 2., 2.0_f64.sqrt() / 2.)
+        );
+        assert_eq!(full_quarter * p, Tuple::point(0., 0., 1.));
+    }
+
+    #[test]
+    fn the_inverse_of_an_x_rotation_rotates_in_the_opposite_direction() {
+        let p = Tuple::point(0., 1., 0.);
+
+        let half_quarter = Matrix::identity().rotation_x(PI / 4.);
+        let inv = half_quarter.inverse();
+
+        assert_eq!(
+            inv * p,
+            Tuple::point(0., 2.0_f64.sqrt() / 2., -(2.0_f64.sqrt() / 2.))
+        );
     }
 }
