@@ -78,7 +78,7 @@ impl Matrix<4> {
         }
     }
 
-    fn determinant(&self) -> f64 {
+    pub fn determinant(&self) -> f64 {
         let mut det = 0.;
 
         for col in 0..4 {
@@ -88,11 +88,11 @@ impl Matrix<4> {
         det
     }
 
-    fn is_invertible(&self) -> bool {
+    pub fn is_invertible(&self) -> bool {
         self.determinant() != 0.
     }
 
-    fn inverse(&self) -> Self {
+    pub fn inverse(&self) -> Self {
         if !self.is_invertible() {
             panic!()
         }
@@ -111,58 +111,64 @@ impl Matrix<4> {
         result
     }
 
-    fn translation(mut self, x: f64, y: f64, z: f64) -> Self {
-        self[0][3] = x;
-        self[1][3] = y;
-        self[2][3] = z;
+    pub fn translation(self, x: f64, y: f64, z: f64) -> Self {
+        let mut m = Self::identity();
+        m[0][3] = x;
+        m[1][3] = y;
+        m[2][3] = z;
 
-        self
+        m * self
     }
 
-    fn scaling(mut self, x: f64, y: f64, z: f64) -> Self {
-        self[0][0] = x;
-        self[1][1] = y;
-        self[2][2] = z;
+    pub fn scaling(self, x: f64, y: f64, z: f64) -> Self {
+        let mut m = Self::identity();
+        m[0][0] = x;
+        m[1][1] = y;
+        m[2][2] = z;
 
-        self
+        m * self
     }
 
-    fn rotation_x(mut self, radians: f64) -> Self {
-        self[1][1] = radians.cos();
-        self[1][2] = -radians.sin();
-        self[2][1] = radians.sin();
-        self[2][2] = radians.cos();
+    pub fn rotation_x(self, radians: f64) -> Self {
+        let mut m = Self::identity();
+        m[1][1] = radians.cos();
+        m[1][2] = -radians.sin();
+        m[2][1] = radians.sin();
+        m[2][2] = radians.cos();
 
-        self
+        m * self
     }
 
-    fn rotation_y(mut self, radians: f64) -> Self {
-        self[0][0] = radians.cos();
-        self[0][2] = radians.sin();
-        self[2][0] = -radians.sin();
-        self[2][2] = radians.cos();
+    pub fn rotation_y(self, radians: f64) -> Self {
+        let mut m = Self::identity();
+        m[0][0] = radians.cos();
+        m[0][2] = radians.sin();
+        m[2][0] = -radians.sin();
+        m[2][2] = radians.cos();
 
-        self
+        m * self
     }
 
-    fn rotation_z(mut self, radians: f64) -> Self {
-        self[0][0] = radians.cos();
-        self[0][1] = -radians.sin();
-        self[1][0] = radians.sin();
-        self[1][1] = radians.cos();
+    pub fn rotation_z(self, radians: f64) -> Self {
+        let mut m = Self::identity();
+        m[0][0] = radians.cos();
+        m[0][1] = -radians.sin();
+        m[1][0] = radians.sin();
+        m[1][1] = radians.cos();
 
-        self
+        m * self
     }
 
-    fn shearing(mut self, xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Self {
-        self[0][1] = xy;
-        self[0][2] = xz;
-        self[1][0] = yx;
-        self[1][2] = yz;
-        self[2][0] = zx;
-        self[2][1] = zy;
+    pub fn shearing(self, xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Self {
+        let mut m = Self::identity();
+        m[0][1] = xy;
+        m[0][2] = xz;
+        m[1][0] = yx;
+        m[1][2] = yz;
+        m[2][0] = zx;
+        m[2][1] = zy;
 
-        self
+        m * self
     }
 }
 
@@ -834,5 +840,48 @@ mod tests {
         let p = Tuple::point(2., 3., 4.);
 
         assert_eq!(transform * p, Tuple::point(2., 3., 7.));
+    }
+
+    #[test]
+    fn individual_transformations_are_applied_in_sequence() {
+        let p = Tuple::point(1., 0., 1.);
+        let rotation = Matrix::identity().rotation_x(PI / 2.);
+        let scaling = Matrix::identity().scaling(5., 5., 5.);
+        let translation = Matrix::identity().translation(10., 5., 7.);
+
+        // apply rotation first
+        let p2 = rotation * p;
+        assert_eq!(p2, Tuple::point(1., -1., 0.));
+
+        // then apply scaling
+        let p3 = scaling * p2;
+        assert_eq!(p3, Tuple::point(5., -5., 0.));
+
+        // then apply translation
+        let p4 = translation * p3;
+        assert_eq!(p4, Tuple::point(15., 0., 7.));
+    }
+
+    #[test]
+    fn chained_transformations_must_be_applied_in_reverse_order() {
+        let p = Tuple::point(1., 0., 1.);
+        let rotation = Matrix::identity().rotation_x(PI / 2.);
+        let scaling = Matrix::identity().scaling(5., 5., 5.);
+        let translation = Matrix::identity().translation(10., 5., 7.);
+
+        let transformations = translation * scaling * rotation;
+
+        assert_eq!(transformations * p, Tuple::point(15., 0., 7.));
+    }
+
+    #[test]
+    fn chained_transformations_fluent_api() {
+        let p = Tuple::point(1., 0., 1.);
+        let transformations = Matrix::identity()
+            .rotation_x(PI / 2.)
+            .scaling(5., 5., 5.)
+            .translation(10., 5., 7.);
+
+        assert_eq!(transformations * p, Tuple::point(15., 0., 7.));
     }
 }

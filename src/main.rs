@@ -37,11 +37,7 @@ fn main() -> std::io::Result<()> {
         velocity: Tuple::vector(1.0, 1.0, 0.0).normalize() * 11.25,
     };
 
-    let mut count = 0u32;
-
     loop {
-        count += 1;
-
         projectile = tick(environment.clone(), projectile.clone());
 
         if projectile.position.y <= 0.0 || projectile.position.x as usize >= canvas.width {
