@@ -2,7 +2,7 @@ use std::ops::{Index, IndexMut, Mul};
 
 use crate::{tuple::Tuple, utils::equal::equal};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Matrix<const D: usize> {
     data: [[f64; D]; D],
 }

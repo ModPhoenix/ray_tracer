@@ -33,6 +33,11 @@ impl Canvas {
         self.pixels[index] = color.clone();
     }
 
+    pub fn set_center(&mut self, x: usize, y: usize, color: &Color) {
+        let index = self.get_pixel_index(x + self.width / 2, self.height / 2 - y);
+        self.pixels[index] = color.clone();
+    }
+
     fn get_pixel_index(&self, x: usize, y: usize) -> usize {
         y * self.width + x
     }
