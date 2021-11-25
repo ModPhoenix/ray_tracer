@@ -4,5 +4,6 @@ pub mod constants;
 pub mod matrix;
 pub mod ray;
 pub mod rgb;
+pub mod sphere;
 pub mod tuple;
 pub mod utils;

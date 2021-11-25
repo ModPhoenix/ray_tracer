@@ -1,8 +1,8 @@
 use crate::tuple::Tuple;
 
 pub struct Ray {
-    origin: Tuple,
-    direction: Tuple,
+    pub origin: Tuple,
+    pub direction: Tuple,
 }
 
 impl Ray {
