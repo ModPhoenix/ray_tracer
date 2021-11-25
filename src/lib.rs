@@ -1,6 +1,7 @@
 pub mod canvas;
 pub mod color;
 pub mod constants;
+pub mod intersections;
 pub mod matrix;
 pub mod ray;
 pub mod rgb;
