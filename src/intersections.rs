@@ -8,7 +8,9 @@ where
 {
     fn intersection(&self, t: f64) -> Intersection<T>;
 
-    fn intersections(intersections: Vec<Intersection<T>>) -> Intersections<T> {
+    fn intersections(mut intersections: Vec<Intersection<T>>) -> Intersections<T> {
+        intersections.sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap());
+
         Intersections::new(intersections)
     }
 
@@ -54,6 +56,16 @@ where
     pub fn len(&self) -> usize {
         self.data.len()
     }
+
+    pub fn hit(&self) -> Option<&Intersection<T>> {
+        for intersection in self.data.iter() {
+            if intersection.t > 0.0 {
+                return Some(intersection);
+            }
+        }
+
+        None
+    }
 }
 
 impl<T> Index<usize> for Intersections<T>
@@ -89,5 +101,47 @@ mod tests {
         assert_eq!(xs.len(), 2);
         assert_eq!(xs[0].t, 1.);
         assert_eq!(xs[1].t, 2.);
+    }
+
+    #[test]
+    fn the_hit_when_all_intersections_have_positive_t() {
+        let s = Sphere::new();
+        let i1 = s.intersection(1.0);
+        let i2 = s.intersection(2.0);
+        let i = Sphere::intersections(vec![i2, i1.clone()]);
+
+        assert_eq!(i.hit(), Some(&i1));
+    }
+
+    #[test]
+    fn the_hit_when_some_intersections_have_negative_t() {
+        let s = Sphere::new();
+        let i1 = s.intersection(-1.0);
+        let i2 = s.intersection(1.0);
+        let i = Sphere::intersections(vec![i2.clone(), i1]);
+
+        assert_eq!(i.hit(), Some(&i2));
+    }
+
+    #[test]
+    fn the_hit_when_all_intersections_have_negative_t() {
+        let s = Sphere::new();
+        let i1 = s.intersection(-2.0);
+        let i2 = s.intersection(-1.0);
+        let i = Sphere::intersections(vec![i2, i1]);
+
+        assert_eq!(i.hit(), None);
+    }
+
+    #[test]
+    fn the_hit_is_always_the_lowest_nonnegative_intersection() {
+        let s = Sphere::new();
+        let i1 = s.intersection(5.0);
+        let i2 = s.intersection(7.0);
+        let i3 = s.intersection(-3.0);
+        let i4 = s.intersection(2.0);
+        let i = Sphere::intersections(vec![i1, i2, i3, i4.clone()]);
+
+        assert_eq!(i.hit(), Some(&i4));
     }
 }
