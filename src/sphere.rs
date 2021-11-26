@@ -22,8 +22,14 @@ impl Sphere {
         self.transform = matrix
     }
 
-    pub fn normal_at(&self, p: Tuple) -> Tuple {
-        (p - Tuple::point(0., 0., 0.)).normalize()
+    pub fn normal_at(&self, world_point: Tuple) -> Tuple {
+        let object_point = self.transform.inverse() * world_point;
+        let object_normal = object_point - Tuple::point(0., 0., 0.);
+        let mut world_normal = self.transform.inverse().transpose() * object_normal;
+
+        world_normal.w = 0.;
+
+        world_normal.normalize()
     }
 }
 
@@ -55,6 +61,8 @@ impl Intersectable<Sphere> for Sphere {
 
 #[cfg(test)]
 mod tests {
+    use std::f64::consts::PI;
+
     use crate::{
         intersections::Intersectable, matrix::Matrix, ray::Ray, sphere::Sphere, tuple::Tuple,
     };
@@ -205,5 +213,25 @@ mod tests {
         let n = s.normal_at(Tuple::point(value, value, value));
 
         assert_eq!(n, Tuple::vector(value, value, value).normalize());
+    }
+
+    #[test]
+    fn computing_the_normal_on_a_translated_sphere() {
+        let mut s = Sphere::new();
+        s.set_transform(Matrix::identity().translation(0., 1., 0.));
+
+        let n = s.normal_at(Tuple::point(0., 1.70711, -0.70711));
+
+        assert_eq!(n, Tuple::vector(0., 0.70711, -0.70711));
+    }
+
+    #[test]
+    fn computing_the_normal_on_a_transformed_sphere() {
+        let mut s = Sphere::new();
+        s.set_transform(Matrix::identity().rotation_z(PI / 5.).scaling(1., 0.5, 1.));
+
+        let n = s.normal_at(Tuple::point(0., 2.0_f64.sqrt() / 2., -2.0_f64.sqrt() / 2.));
+
+        assert_eq!(n, Tuple::vector(0., 0.97014, -0.24254));
     }
 }
