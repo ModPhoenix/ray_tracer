@@ -1,16 +1,25 @@
 use crate::{
     intersections::{Intersectable, Intersection},
+    matrix::Matrix,
     ray::Ray,
     tuple::Tuple,
 };
 
 #[derive(Debug, Clone, PartialEq)]
 
-pub struct Sphere;
+pub struct Sphere {
+    pub transform: Matrix<4>,
+}
 
 impl Sphere {
     pub fn new() -> Self {
-        Self
+        Self {
+            transform: Matrix::identity(),
+        }
+    }
+
+    pub fn set_transform(&mut self, matrix: Matrix<4>) {
+        self.transform = matrix
     }
 }
 
@@ -20,9 +29,11 @@ impl Intersectable<Sphere> for Sphere {
     }
 
     fn intersect(&self, ray: &Ray) -> Option<[Intersection<Self>; 2]> {
-        let sphere_to_ray = ray.origin - Tuple::point(0., 0., 0.);
-        let a = Tuple::dot(&ray.direction, &ray.direction);
-        let b = 2.0 * Tuple::dot(&ray.direction, &sphere_to_ray);
+        let ray_transformed = ray.transform(self.transform.inverse());
+
+        let sphere_to_ray = ray_transformed.origin - Tuple::point(0., 0., 0.);
+        let a = Tuple::dot(&ray_transformed.direction, &ray_transformed.direction);
+        let b = 2.0 * Tuple::dot(&ray_transformed.direction, &sphere_to_ray);
         let c = Tuple::dot(&sphere_to_ray, &sphere_to_ray) - 1.0;
 
         let discriminant = b.powf(2.0) - 4.0 * a * c;
@@ -40,7 +51,9 @@ impl Intersectable<Sphere> for Sphere {
 
 #[cfg(test)]
 mod tests {
-    use crate::{intersections::Intersectable, ray::Ray, sphere::Sphere, tuple::Tuple};
+    use crate::{
+        intersections::Intersectable, matrix::Matrix, ray::Ray, sphere::Sphere, tuple::Tuple,
+    };
 
     #[test]
     fn a_ray_intersects_a_sphere_at_two_points() {
@@ -99,5 +112,45 @@ mod tests {
         assert_eq!(xs.clone().unwrap().len(), 2);
         assert_eq!(xs.clone().unwrap()[0].object, s);
         assert_eq!(xs.unwrap()[1].object, s);
+    }
+
+    #[test]
+    fn a_sphere_default_transformation() {
+        let s = Sphere::new();
+
+        assert_eq!(s.transform, Matrix::identity());
+    }
+
+    #[test]
+    fn changing_a_sphere_transformation() {
+        let mut s = Sphere::new();
+        let t = Matrix::identity().translation(2., 3., 4.);
+        s.set_transform(t);
+
+        assert_eq!(s.transform, t);
+    }
+
+    #[test]
+    fn intersecting_a_scaled_sphere_with_a_ray() {
+        let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vector(0., 0., 1.));
+        let mut s = Sphere::new();
+        s.set_transform(Matrix::identity().scaling(2., 2., 2.));
+
+        let xs = s.intersect(&r);
+
+        assert_eq!(xs.clone().unwrap().len(), 2);
+        assert_eq!(xs.clone().unwrap()[0].t, 3.);
+        assert_eq!(xs.unwrap()[1].t, 7.);
+    }
+
+    #[test]
+    fn intersecting_a_translated_sphere_with_a_ray() {
+        let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vector(0., 0., 1.));
+        let mut s = Sphere::new();
+        s.set_transform(Matrix::identity().translation(5., 0., 0.));
+
+        let xs = s.intersect(&r);
+
+        assert_eq!(xs, None);
     }
 }
