@@ -107,10 +107,6 @@ impl Canvas {
             }
         }
 
-        if body.starts_with(' ') {
-            body.pop();
-        }
-
         header + &body
     }
 }
