@@ -21,6 +21,10 @@ impl Sphere {
     pub fn set_transform(&mut self, matrix: Matrix<4>) {
         self.transform = matrix
     }
+
+    pub fn normal_at(&self, p: Tuple) -> Tuple {
+        (p - Tuple::point(0., 0., 0.)).normalize()
+    }
 }
 
 impl Intersectable<Sphere> for Sphere {
@@ -152,5 +156,54 @@ mod tests {
         let xs = s.intersect(&r);
 
         assert_eq!(xs, None);
+    }
+
+    #[test]
+    fn the_normal_on_a_sphere_at_a_point_on_the_x_axis() {
+        let s = Sphere::new();
+
+        let n = s.normal_at(Tuple::point(1., 0., 0.));
+
+        assert_eq!(n, Tuple::vector(1., 0., 0.));
+    }
+
+    #[test]
+    fn the_normal_on_a_sphere_at_a_point_on_the_y_axis() {
+        let s = Sphere::new();
+
+        let n = s.normal_at(Tuple::point(0., 1., 0.));
+
+        assert_eq!(n, Tuple::vector(0., 1., 0.));
+    }
+
+    #[test]
+    fn the_normal_on_a_sphere_at_a_point_on_the_z_axis() {
+        let s = Sphere::new();
+
+        let n = s.normal_at(Tuple::point(0., 0., 1.));
+
+        assert_eq!(n, Tuple::vector(0., 0., 1.));
+    }
+
+    #[test]
+    fn the_normal_on_a_sphere_at_a_nonaxial_point() {
+        let s = Sphere::new();
+
+        let value = 3.0_f64.sqrt() / 3.;
+
+        let n = s.normal_at(Tuple::point(value, value, value));
+
+        assert_eq!(n, Tuple::vector(value, value, value));
+    }
+
+    #[test]
+    fn the_normal_is_a_normalized_vector() {
+        let s = Sphere::new();
+
+        let value = 3.0_f64.sqrt() / 3.;
+
+        let n = s.normal_at(Tuple::point(value, value, value));
+
+        assert_eq!(n, Tuple::vector(value, value, value).normalize());
     }
 }
