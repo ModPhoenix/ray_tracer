@@ -1,5 +1,6 @@
 use crate::{color::Color, tuple::Tuple};
 
+#[derive(Debug, Clone)]
 pub struct Light {
     pub position: Tuple,
     pub intensity: Color,
