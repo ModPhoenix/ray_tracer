@@ -1,5 +1,6 @@
 use crate::{
     intersections::{Intersectable, Intersection},
+    material::Material,
     matrix::Matrix,
     ray::Ray,
     tuple::Tuple,
@@ -9,12 +10,14 @@ use crate::{
 
 pub struct Sphere {
     pub transform: Matrix<4>,
+    pub material: Material,
 }
 
 impl Sphere {
     pub fn new() -> Self {
         Self {
             transform: Matrix::identity(),
+            material: Material::new(),
         }
     }
 
@@ -64,7 +67,8 @@ mod tests {
     use std::f64::consts::PI;
 
     use crate::{
-        intersections::Intersectable, matrix::Matrix, ray::Ray, sphere::Sphere, tuple::Tuple,
+        intersections::Intersectable, material::Material, matrix::Matrix, ray::Ray, sphere::Sphere,
+        tuple::Tuple,
     };
 
     #[test]
@@ -233,5 +237,23 @@ mod tests {
         let n = s.normal_at(Tuple::point(0., 2.0_f64.sqrt() / 2., -2.0_f64.sqrt() / 2.));
 
         assert_eq!(n, Tuple::vector(0., 0.97014, -0.24254));
+    }
+
+    #[test]
+    fn a_sphere_has_a_default_material() {
+        let s = Sphere::new();
+
+        assert_eq!(s.material, Material::new());
+    }
+
+    #[test]
+    fn a_sphere_may_be_assigned_a_material() {
+        let mut s = Sphere::new();
+        let mut m = Material::new();
+        m.ambient = 1.;
+
+        s.material = m.clone();
+
+        assert_eq!(s.material, m);
     }
 }
