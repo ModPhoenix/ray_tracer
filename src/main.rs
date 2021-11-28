@@ -3,8 +3,11 @@ use std::io::prelude::*;
 
 use ray_tracer::intersections::{Intersectable, Intersections};
 use ray_tracer::light::Light;
+use ray_tracer::material::Material;
+use ray_tracer::matrix::Matrix;
 use ray_tracer::ray::Ray;
 use ray_tracer::sphere::Sphere;
+use ray_tracer::world::Object;
 use ray_tracer::{canvas::Canvas, color::Color, tuple::Tuple};
 
 fn main() -> std::io::Result<()> {
@@ -17,10 +20,11 @@ fn main() -> std::io::Result<()> {
 
     let mut canvas = Canvas::new(canvas_pixels, canvas_pixels);
 
-    let mut sphere = Sphere::new();
-    sphere.material.color = Color::new(1., 0.2, 1.);
+    let sphere = Sphere::default()
+        .set_material(Material::default().set_color(Color::new(0.5, 0.5, 0.5)))
+        .set_transform(Matrix::identity().scaling(0.5, 0.5, 0.5));
 
-    let light_position = Tuple::point(-10., 10., -10.);
+    let light_position = Tuple::point(-10., 10., -15.);
     let light_color = Color::new(1., 1., 1.);
     let light = Light::new(light_position, light_color);
 
@@ -33,29 +37,22 @@ fn main() -> std::io::Result<()> {
             let ray = Ray::new(ray_origin, (position - ray_origin).normalize());
             let xs = sphere.intersect(&ray);
 
-            match xs {
-                Some(intersect) => {
-                    let intersections = Intersections::new(intersect.to_vec());
+            if let Some(intersect) = xs {
+                let intersections = Intersections::new(intersect.to_vec());
 
-                    match intersections.hit() {
-                        Some(hit) => {
-                            let point = ray.position(hit.t);
-                            let normal = hit.object.normal_at(point);
-                            let eye = -ray.direction;
+                if let Some(hit) = intersections.hit() {
+                    let point = ray.position(hit.t);
+                    let normal = hit.object.normal_at(point);
+                    let eye = -ray.direction;
 
-                            let color = hit.object.material.clone().lighting(
-                                light.clone(),
-                                point,
-                                eye,
-                                normal,
-                            );
+                    let color =
+                        hit.object
+                            .material
+                            .clone()
+                            .lighting(light.clone(), point, eye, normal);
 
-                            canvas.set(x, y, &color);
-                        }
-                        None => {}
-                    }
+                    canvas.set(x, y, &color);
                 }
-                None => {}
             }
         }
     }

@@ -10,3 +10,4 @@ pub mod rgb;
 pub mod sphere;
 pub mod tuple;
 pub mod utils;
+pub mod world;
