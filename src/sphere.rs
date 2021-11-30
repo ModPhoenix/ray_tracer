@@ -4,7 +4,7 @@ use crate::{
     matrix::Matrix,
     ray::Ray,
     tuple::Tuple,
-    world::Object,
+    world::Normal,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -38,7 +38,7 @@ impl Default for Sphere {
     }
 }
 
-impl Object for Sphere {
+impl Normal for Sphere {
     fn normal_at(&self, world_point: Tuple) -> Tuple {
         let object_point = self.transform.inverse() * world_point;
         let object_normal = object_point - Tuple::point(0., 0., 0.);
@@ -50,12 +50,12 @@ impl Object for Sphere {
     }
 }
 
-impl Intersectable<Sphere> for Sphere {
-    fn intersection(&self, t: f64) -> Intersection<Sphere> {
-        Intersection::new(t, self.clone())
+impl Intersectable for Sphere {
+    fn intersection(&self, t: f64) -> Intersection {
+        Intersection::new(t, self.clone().into())
     }
 
-    fn intersect(&self, ray: &Ray) -> Option<[Intersection<Self>; 2]> {
+    fn intersect(&self, ray: &Ray) -> Option<Vec<Intersection>> {
         let ray_transformed = ray.transform(self.transform.inverse());
 
         let sphere_to_ray = ray_transformed.origin - Tuple::point(0., 0., 0.);
@@ -71,7 +71,7 @@ impl Intersectable<Sphere> for Sphere {
             let t1 = (-b - discriminant.sqrt()) / (2.0 * a);
             let t2 = (-b + discriminant.sqrt()) / (2.0 * a);
 
-            return Some([self.intersection(t1), self.intersection(t2)]);
+            return Some(vec![self.intersection(t1), self.intersection(t2)]);
         }
     }
 }
@@ -82,7 +82,7 @@ mod tests {
 
     use crate::{
         intersections::Intersectable, material::Material, matrix::Matrix, ray::Ray, sphere::Sphere,
-        tuple::Tuple, world::Object,
+        tuple::Tuple, world::Normal,
     };
 
     #[test]
@@ -140,8 +140,8 @@ mod tests {
         let xs = Sphere::default().intersect(&r);
 
         assert_eq!(xs.clone().unwrap().len(), 2);
-        assert_eq!(xs.clone().unwrap()[0].object, s);
-        assert_eq!(xs.unwrap()[1].object, s);
+        assert_eq!(xs.clone().unwrap()[0].object, s.clone().into());
+        assert_eq!(xs.unwrap()[1].object, s.into());
     }
 
     #[test]

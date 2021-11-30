@@ -1,53 +1,84 @@
 use std::ops::Index;
 
-use crate::ray::Ray;
+use crate::{object::Object, ray::Ray, tuple::Tuple, world::Normal};
 
-pub trait Intersectable<T>
-where
-    T: Intersectable<T>,
-{
-    fn intersection(&self, t: f64) -> Intersection<T>;
+pub trait Intersectable {
+    fn intersection(&self, t: f64) -> Intersection;
 
-    fn intersections(mut intersections: Vec<Intersection<T>>) -> Intersections<T> {
-        intersections.sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap());
-
+    fn intersections(intersections: Vec<Intersection>) -> Intersections {
         Intersections::new(intersections)
     }
 
-    fn intersect(&self, ray: &Ray) -> Option<[Intersection<T>; 2]>;
+    fn intersect(&self, ray: &Ray) -> Option<Vec<Intersection>>;
 }
 
-#[derive(Debug, Clone, PartialEq)]
-
-pub struct Intersection<T>
-where
-    T: Intersectable<T>,
-{
+#[derive(Debug, Clone)]
+pub struct ComputedIntersection {
     pub t: f64,
-    pub object: T,
+    pub object: Object,
+    pub point: Tuple,
+    pub normalv: Tuple,
+    pub eyev: Tuple,
+    pub inside: bool,
 }
 
-impl<T> Intersection<T>
-where
-    T: Intersectable<T>,
-{
-    pub fn new(t: f64, object: T) -> Self {
-        Self { t, object }
+impl ComputedIntersection {
+    pub fn new(
+        t: f64,
+        object: Object,
+        point: Tuple,
+        normalv: Tuple,
+        eyev: Tuple,
+        inside: bool,
+    ) -> Self {
+        Self {
+            t,
+            object,
+            point,
+            normalv,
+            eyev,
+            inside,
+        }
     }
 }
 
-pub struct Intersections<T>
-where
-    T: Intersectable<T>,
-{
-    data: Vec<Intersection<T>>,
+#[derive(Debug, Clone, PartialEq)]
+pub struct Intersection {
+    pub t: f64,
+    pub object: Object,
 }
 
-impl<T> Intersections<T>
-where
-    T: Intersectable<T>,
-{
-    pub fn new(intersections: Vec<Intersection<T>>) -> Self {
+impl Intersection {
+    pub fn new(t: f64, object: Object) -> Self {
+        Self { t, object }
+    }
+
+    pub fn prepare_computations(&self, ray: &Ray) -> ComputedIntersection {
+        let point = ray.position(self.t);
+        let mut normalv = self.object.normal_at(point);
+        let eyev = -ray.direction;
+        let inside;
+
+        if Tuple::dot(&normalv, &eyev) < 0. {
+            normalv = -normalv;
+            inside = true;
+        } else {
+            inside = false;
+        }
+
+        ComputedIntersection::new(self.t, self.object.clone(), point, normalv, eyev, inside)
+    }
+}
+
+#[derive(Debug)]
+pub struct Intersections {
+    data: Vec<Intersection>,
+}
+
+impl Intersections {
+    pub fn new(mut intersections: Vec<Intersection>) -> Self {
+        intersections.sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap());
+
         Self {
             data: intersections,
         }
@@ -57,7 +88,7 @@ where
         self.data.len()
     }
 
-    pub fn hit(&self) -> Option<&Intersection<T>> {
+    pub fn hit(&self) -> Option<&Intersection> {
         for intersection in self.data.iter() {
             if intersection.t > 0.0 {
                 return Some(intersection);
@@ -68,11 +99,8 @@ where
     }
 }
 
-impl<T> Index<usize> for Intersections<T>
-where
-    T: Intersectable<T>,
-{
-    type Output = Intersection<T>;
+impl Index<usize> for Intersections {
+    type Output = Intersection;
     fn index(&self, index: usize) -> &Self::Output {
         &self.data[index]
     }
@@ -80,7 +108,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::{intersections::Intersectable, sphere::Sphere};
+    use crate::{intersections::Intersectable, ray::Ray, sphere::Sphere, tuple::Tuple};
 
     #[test]
     fn an_intersection_encapsulates_t_and_object() {
@@ -88,7 +116,48 @@ mod tests {
         let i = s.intersection(3.5);
 
         assert_eq!(i.t, 3.5);
-        assert_eq!(i.object, s);
+        assert_eq!(i.object, s.into());
+    }
+
+    #[test]
+    fn precomputing_the_state_of_an_intersection() {
+        let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vector(0., 0., 1.));
+        let shape = Sphere::default();
+        let i = shape.intersection(4.);
+
+        let comps = i.prepare_computations(&r);
+
+        assert_eq!(comps.t, i.t);
+        assert_eq!(comps.object, i.object);
+        assert_eq!(comps.point, Tuple::point(0., 0., -1.));
+        assert_eq!(comps.eyev, Tuple::vector(0., 0., -1.));
+        assert_eq!(comps.normalv, Tuple::vector(0., 0., -1.));
+    }
+
+    #[test]
+    fn the_hit_when_an_intersection_occurs_on_the_outside() {
+        let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vector(0., 0., 1.));
+        let shape = Sphere::default();
+        let i = shape.intersection(4.);
+
+        let comps = i.prepare_computations(&r);
+
+        assert_eq!(comps.inside, false);
+    }
+
+    #[test]
+    fn the_hit_when_an_intersection_occurs_on_the_inside() {
+        let r = Ray::new(Tuple::point(0., 0., 0.), Tuple::vector(0., 0., 1.));
+        let shape = Sphere::default();
+        let i = shape.intersection(1.);
+
+        let comps = i.prepare_computations(&r);
+
+        assert_eq!(comps.point, Tuple::point(0., 0., 1.));
+        assert_eq!(comps.eyev, Tuple::vector(0., 0., -1.));
+        assert_eq!(comps.inside, true);
+        // normal would have been (0, 0, 1), but is inverted!
+        assert_eq!(comps.normalv, Tuple::vector(0., 0., -1.));
     }
 
     #[test]

@@ -7,7 +7,7 @@ use ray_tracer::material::Material;
 use ray_tracer::matrix::Matrix;
 use ray_tracer::ray::Ray;
 use ray_tracer::sphere::Sphere;
-use ray_tracer::world::Object;
+use ray_tracer::world::Normal;
 use ray_tracer::{canvas::Canvas, color::Color, tuple::Tuple};
 
 fn main() -> std::io::Result<()> {
@@ -21,8 +21,8 @@ fn main() -> std::io::Result<()> {
     let mut canvas = Canvas::new(canvas_pixels, canvas_pixels);
 
     let sphere = Sphere::default()
-        .set_material(Material::default().set_color(Color::new(0.5, 0.5, 0.5)))
-        .set_transform(Matrix::identity().scaling(0.5, 0.5, 0.5));
+        .set_material(Material::default().set_color(Color::new(0.8, 0.5, 0.2)))
+        .set_transform(Matrix::identity().scaling(0.2, 0.7, 0.5));
 
     let light_position = Tuple::point(-10., 10., -15.);
     let light_color = Color::new(1., 1., 1.);
@@ -47,7 +47,7 @@ fn main() -> std::io::Result<()> {
 
                     let color =
                         hit.object
-                            .material
+                            .material()
                             .clone()
                             .lighting(light.clone(), point, eye, normal);
 
