@@ -1,3 +1,4 @@
+use std::f64::consts::PI;
 use std::fs::File;
 use std::io::prelude::*;
 
@@ -21,8 +22,13 @@ fn main() -> std::io::Result<()> {
     let mut canvas = Canvas::new(canvas_pixels, canvas_pixels);
 
     let sphere = Sphere::default()
-        .set_material(Material::default().set_color(Color::new(0.8, 0.5, 0.2)))
-        .set_transform(Matrix::identity().scaling(0.2, 0.7, 0.5));
+        .set_material(Material::default().set_color(Color::new(1., 1.0, 1.0)))
+        .set_transform(
+            Matrix::identity()
+                .scaling(1., 0.6, 0.6)
+                .rotation_y(PI / 1.5)
+                .rotation_z(PI / 1.5),
+        );
 
     let light_position = Tuple::point(-10., 10., -15.);
     let light_color = Color::new(1., 1., 1.);

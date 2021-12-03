@@ -60,8 +60,8 @@ impl Intersection {
         let inside;
 
         if Tuple::dot(&normalv, &eyev) < 0. {
-            normalv = -normalv;
             inside = true;
+            normalv = -normalv;
         } else {
             inside = false;
         }
