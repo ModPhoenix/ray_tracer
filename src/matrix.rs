@@ -170,6 +170,23 @@ impl Matrix<4> {
 
         m * self
     }
+
+    pub fn view_transform(&self, from: Tuple, to: Tuple, up: Tuple) -> Self {
+        let forward = (to - from).normalize();
+        let upn = up.normalize();
+        let left = Tuple::cross(&forward, &upn);
+        let true_up = Tuple::cross(&left, &forward);
+
+        #[rustfmt::skip]
+        let orientation  = Matrix::from([
+            [    left.x,     left.y,     left.z, 0.],
+            [ true_up.x,  true_up.y,  true_up.z, 0.],
+            [-forward.x, -forward.y, -forward.z, 0.],
+            [        0.,         0.,         0., 1.],
+        ]);
+
+        orientation * Matrix::identity().translation(-from.x, -from.y, -from.z)
+    }
 }
 
 impl Matrix<3> {
@@ -883,5 +900,58 @@ mod tests {
             .translation(10., 5., 7.);
 
         assert_eq!(transformations * p, Tuple::point(15., 0., 7.));
+    }
+
+    #[test]
+    fn the_transformation_matrix_for_the_default_orientation() {
+        let from = Tuple::point(0., 0., 0.);
+        let to = Tuple::point(0., 0., -1.);
+        let up = Tuple::vector(0., 1., 0.);
+
+        let t = Matrix::identity().view_transform(from, to, up);
+
+        assert_eq!(t, Matrix::identity());
+    }
+
+    #[test]
+    fn a_view_transformation_matrix_looking_in_positive_z_direction() {
+        let from = Tuple::point(0., 0., 0.);
+        let to = Tuple::point(0., 0., 1.);
+        let up = Tuple::vector(0., 1., 0.);
+
+        let t = Matrix::identity().view_transform(from, to, up);
+
+        assert_eq!(t, Matrix::identity().scaling(-1., 1., -1.));
+    }
+
+    #[test]
+    fn the_view_transformation_moves_the_world() {
+        let from = Tuple::point(0., 0., 8.);
+        let to = Tuple::point(0., 0., 0.);
+        let up = Tuple::vector(0., 1., 0.);
+
+        let t = Matrix::identity().view_transform(from, to, up);
+
+        assert_eq!(t, Matrix::identity().translation(0., 0., -8.));
+    }
+
+    #[test]
+    fn an_arbitrary_view_transformation() {
+        let from = Tuple::point(1., 3., 2.);
+        let to = Tuple::point(4., -2., 8.);
+        let up = Tuple::vector(1., 1., 0.);
+
+        let t = Matrix::identity().view_transform(from, to, up);
+
+        #[rustfmt::skip]
+        assert_eq!(
+            t,
+            Matrix::from([
+                [-0.50709, 0.50709,  0.67612, -2.36643],
+                [ 0.76772, 0.60609,  0.12122, -2.82843],
+                [-0.35857, 0.59761, -0.71714,  0.00000],
+                [ 0.00000, 0.00000,  0.00000,  1.00000],
+            ])
+        );
     }
 }
