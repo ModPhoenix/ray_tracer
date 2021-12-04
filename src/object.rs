@@ -13,10 +13,20 @@ pub enum Object {
 }
 
 impl Object {
-    pub fn material(&self) -> &Material {
+    pub fn get_material(&self) -> Material {
         match self {
-            Object::Sphere(sphere) => &sphere.material,
+            Object::Sphere(sphere) => sphere.material.clone(),
         }
+    }
+
+    pub fn set_material(&mut self, material: Material) -> Self {
+        match self {
+            Object::Sphere(sphere) => {
+                sphere.set_material(material);
+            }
+        }
+
+        self.clone()
     }
 }
 

@@ -21,9 +21,9 @@ impl Sphere {
         }
     }
 
-    pub fn set_material(mut self, material: Material) -> Self {
+    pub fn set_material(&mut self, material: Material) -> Self {
         self.material = material;
-        self
+        self.clone()
     }
 
     pub fn set_transform(mut self, transform: Matrix<4>) -> Self {
@@ -258,7 +258,7 @@ mod tests {
     #[test]
     fn a_sphere_may_be_assigned_a_material() {
         let mut s = Sphere::default();
-        let m = Material::default().set_ambient(1.);
+        let m = Material::default().set_ambient(1.).clone();
 
         s.material = m.clone();
 

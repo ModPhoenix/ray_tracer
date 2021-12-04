@@ -20,6 +20,10 @@ impl Material {
         }
     }
 
+    pub fn get_color(self) -> Color {
+        self.color
+    }
+
     pub fn set_color(mut self, color: Color) -> Self {
         self.color = color;
         self

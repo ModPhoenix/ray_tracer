@@ -53,8 +53,7 @@ fn main() -> std::io::Result<()> {
 
                     let color =
                         hit.object
-                            .material()
-                            .clone()
+                            .get_material()
                             .lighting(light.clone(), point, eye, normal);
 
                     canvas.set(x, y, &color);

@@ -88,8 +88,8 @@ impl Intersections {
         self.data.len()
     }
 
-    pub fn hit(&self) -> Option<&Intersection> {
-        for intersection in self.data.iter() {
+    pub fn hit(self) -> Option<Intersection> {
+        for intersection in self.data.into_iter() {
             if intersection.t > 0.0 {
                 return Some(intersection);
             }
@@ -179,7 +179,7 @@ mod tests {
         let i2 = s.intersection(2.0);
         let i = Sphere::intersections(vec![i2, i1.clone()]);
 
-        assert_eq!(i.hit(), Some(&i1));
+        assert_eq!(i.hit(), Some(i1));
     }
 
     #[test]
@@ -189,7 +189,7 @@ mod tests {
         let i2 = s.intersection(1.0);
         let i = Sphere::intersections(vec![i2.clone(), i1]);
 
-        assert_eq!(i.hit(), Some(&i2));
+        assert_eq!(i.hit(), Some(i2));
     }
 
     #[test]
@@ -211,6 +211,6 @@ mod tests {
         let i4 = s.intersection(2.0);
         let i = Sphere::intersections(vec![i1, i2, i3, i4.clone()]);
 
-        assert_eq!(i.hit(), Some(&i4));
+        assert_eq!(i.hit(), Some(i4));
     }
 }

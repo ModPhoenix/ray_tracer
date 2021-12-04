@@ -10,6 +10,7 @@ pub trait Normal {
     fn normal_at(&self, world_point: Tuple) -> Tuple;
 }
 
+#[derive(Debug, Clone)]
 pub struct World {
     light: Option<Light>,
     objects: Vec<Object>,
@@ -37,13 +38,25 @@ impl World {
         Intersections::new(xs)
     }
 
-    pub fn shade_hit(&self, comps: &ComputedIntersection) -> Color {
-        comps.object.material().clone().lighting(
+    // TODO: add support multiple light sources
+    pub fn shade_hit(&self, comps: ComputedIntersection) -> Color {
+        comps.object.get_material().lighting(
             self.light.clone().unwrap(),
             comps.point,
             comps.eyev,
             comps.normalv,
         )
+    }
+
+    pub fn color_at(&self, ray: &Ray) -> Color {
+        let xs = self.intersect(ray);
+        match xs.hit() {
+            Some(intersection) => {
+                let comps = intersection.prepare_computations(ray);
+                self.shade_hit(comps)
+            }
+            None => Color::new_black(),
+        }
     }
 }
 
@@ -58,6 +71,7 @@ impl Default for World {
 
 #[cfg(test)]
 mod tests {
+
     use crate::{
         color::Color, intersections::Intersectable, light::Light, material::Material,
         matrix::Matrix, ray::Ray, sphere::Sphere, tuple::Tuple,
@@ -125,7 +139,7 @@ mod tests {
         let i = shape.intersection(4.);
         let comps = i.prepare_computations(&r);
 
-        let c = w.shade_hit(&comps);
+        let c = w.shade_hit(comps);
 
         assert_eq!(c, Color::new(0.38066, 0.47583, 0.2855));
     }
@@ -143,8 +157,51 @@ mod tests {
         let i = shape.intersection(0.5);
         let comps = i.prepare_computations(&r);
 
-        let c = w.shade_hit(&comps);
+        let c = w.shade_hit(comps);
 
         assert_eq!(c, Color::new(0.90498, 0.90498, 0.90498));
+    }
+
+    #[test]
+    fn the_color_when_a_ray_misses() {
+        let w = default_world();
+        let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vector(0., 1., 0.));
+
+        let c = w.color_at(&r);
+
+        assert_eq!(c, Color::new(0., 0., 0.));
+    }
+
+    #[test]
+    fn the_color_when_a_ray_hits() {
+        let w = default_world();
+        let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vector(0., 0., 1.));
+
+        let c = w.color_at(&r);
+
+        assert_eq!(c, Color::new(0.38066, 0.47583, 0.2855));
+    }
+
+    #[test]
+    fn the_color_with_an_intersection_behind_the_ray() {
+        let mut w = default_world();
+
+        w.objects = w
+            .objects
+            .iter_mut()
+            .map(|object| {
+                let material = object.get_material().set_ambient(1.);
+
+                object.set_material(material)
+            })
+            .collect();
+
+        let inner = &w.objects[1];
+
+        let r = Ray::new(Tuple::point(0., 0., 0.75), Tuple::vector(0., 0., -1.));
+
+        let c = w.clone().color_at(&r);
+
+        assert_eq!(c, inner.clone().get_material().clone().get_color());
     }
 }
