@@ -21,9 +21,9 @@ impl Sphere {
         }
     }
 
-    pub fn set_material(&mut self, material: Material) -> Self {
+    pub fn set_material(mut self, material: Material) -> Self {
         self.material = material;
-        self.clone()
+        self
     }
 
     pub fn set_transform(mut self, transform: Matrix<4>) -> Self {

@@ -184,17 +184,19 @@ mod tests {
 
     #[test]
     fn the_color_with_an_intersection_behind_the_ray() {
-        let mut w = default_world();
+        let light = Light::new(Tuple::point(-10., 10., -10.), Color::new(1., 1., 1.));
+        let s1 = Sphere::default().set_material(
+            Material::default()
+                .set_color(Color::new(0.8, 1.0, 0.6))
+                .set_diffuse(0.7)
+                .set_specular(0.2)
+                .set_ambient(1.),
+        );
+        let s2 = Sphere::default()
+            .set_transform(Matrix::identity().scaling(0.5, 0.5, 0.5))
+            .set_material(Material::default().set_ambient(1.));
 
-        w.objects = w
-            .objects
-            .iter_mut()
-            .map(|object| {
-                let material = object.get_material().set_ambient(1.);
-
-                object.set_material(material)
-            })
-            .collect();
+        let w = World::new(Some(light), vec![s1.into(), s2.into()]);
 
         let inner = &w.objects[1];
 
