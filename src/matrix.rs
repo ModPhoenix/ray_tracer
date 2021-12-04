@@ -1,6 +1,6 @@
 use std::ops::{Index, IndexMut, Mul};
 
-use crate::{tuple::Tuple, utils::equal::equal};
+use crate::{tuple::Tuple, utils::fuzzy_equal::fuzzy_equal};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Matrix<const D: usize> {
@@ -249,7 +249,7 @@ impl<const D: usize> PartialEq for Matrix<D> {
     fn eq(&self, other: &Self) -> bool {
         for row in 0..D {
             for col in 0..D {
-                if !equal(self[row][col], other[row][col]) {
+                if !fuzzy_equal(self[row][col], other[row][col]) {
                     return false;
                 }
             }

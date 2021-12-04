@@ -1,6 +1,6 @@
 use std::ops::{Add, Mul, Sub};
 
-use crate::{rgb::RGB, utils::equal::equal};
+use crate::{rgb::RGB, utils::fuzzy_equal::fuzzy_equal};
 
 #[derive(Debug, Clone)]
 pub struct Color {
@@ -45,7 +45,9 @@ impl Color {
 
 impl PartialEq for Color {
     fn eq(&self, other: &Self) -> bool {
-        equal(self.red, other.red) && equal(self.green, other.green) && equal(self.blue, other.blue)
+        fuzzy_equal(self.red, other.red)
+            && fuzzy_equal(self.green, other.green)
+            && fuzzy_equal(self.blue, other.blue)
     }
 }
 

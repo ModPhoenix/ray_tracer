@@ -1,1 +1,1 @@
-pub mod equal;
+pub mod fuzzy_equal;

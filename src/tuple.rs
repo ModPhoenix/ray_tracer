@@ -1,6 +1,6 @@
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
-use crate::utils::equal::equal;
+use crate::utils::fuzzy_equal::fuzzy_equal;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Tuple {
@@ -65,10 +65,10 @@ impl Tuple {
 
 impl PartialEq for Tuple {
     fn eq(&self, other: &Self) -> bool {
-        equal(self.x, other.x)
-            && equal(self.y, other.y)
-            && equal(self.z, other.z)
-            && equal(self.w, other.w)
+        fuzzy_equal(self.x, other.x)
+            && fuzzy_equal(self.y, other.y)
+            && fuzzy_equal(self.z, other.z)
+            && fuzzy_equal(self.w, other.w)
     }
 }
 
