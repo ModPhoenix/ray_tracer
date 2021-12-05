@@ -46,7 +46,7 @@ fn main() -> std::io::Result<()> {
                 .set_diffuse(0.9)
                 .set_specular(0.1),
         )
-        .set_transform(Matrix::identity().translation(-0.5, 1., 0.5));
+        .set_transform(Matrix::identity().translation(-0.5, 1., 1.5));
 
     let right = Sphere::default()
         .set_material(
@@ -94,7 +94,7 @@ fn main() -> std::io::Result<()> {
 
     let camera =
         Camera::new(4096, 3112, PI / 3.5).set_transform(Matrix::identity().view_transform(
-            Tuple::point(0., 20., -15.),
+            Tuple::point(0., 2., -7.),
             Tuple::point(0., 1., 0.),
             Tuple::vector(0., 1., 0.),
         ));

@@ -40,12 +40,14 @@ impl World {
 
     // TODO: add support multiple light sources
     pub fn shade_hit(&self, comps: ComputedIntersection) -> Color {
+        let is_shadowed = self.is_shadowed(comps.over_point);
+
         comps.object.get_material().lighting(
             self.light.clone().unwrap(),
-            comps.point,
+            comps.over_point,
             comps.eyev,
             comps.normalv,
-            false,
+            is_shadowed,
         )
     }
 
@@ -93,8 +95,14 @@ impl Default for World {
 mod tests {
 
     use crate::{
-        color::Color, intersections::Intersectable, light::Light, material::Material,
-        matrix::Matrix, ray::Ray, sphere::Sphere, tuple::Tuple,
+        color::Color,
+        intersections::{Intersectable, Intersection},
+        light::Light,
+        material::Material,
+        matrix::Matrix,
+        ray::Ray,
+        sphere::Sphere,
+        tuple::Tuple,
     };
 
     use super::World;
@@ -257,5 +265,21 @@ mod tests {
         let p = Tuple::point(-2., 2., -2.);
 
         assert_eq!(w.is_shadowed(p), false);
+    }
+
+    #[test]
+    fn shade_hit_is_given_an_intersection_in_shadow() {
+        let light = Light::new(Tuple::point(0., 0., -10.), Color::new(1., 1., 1.));
+        let s1 = Sphere::default();
+        let s2 = Sphere::default().set_transform(Matrix::identity().translation(0., 0., 10.));
+        let r = Ray::new(Tuple::point(0., 0., 5.), Tuple::vector(0., 0., 1.));
+        let i = Intersection::new(4., s2.clone().into());
+        let comps = i.prepare_computations(&r);
+
+        let w = World::new(Some(light), vec![s1.into(), s2.into()]);
+        let c = w.shade_hit(comps);
+        // let p = Tuple::point(-2., 2., -2.);
+
+        assert_eq!(c, Color::new(0.1, 0.1, 0.1));
     }
 }

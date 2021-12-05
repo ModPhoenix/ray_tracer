@@ -1,6 +1,6 @@
 use std::ops::Index;
 
-use crate::{object::Object, ray::Ray, tuple::Tuple, world::Normal};
+use crate::{constants::EPSILON, object::Object, ray::Ray, tuple::Tuple, world::Normal};
 
 pub trait Intersectable {
     fn intersection(&self, t: f64) -> Intersection;
@@ -17,6 +17,7 @@ pub struct ComputedIntersection {
     pub t: f64,
     pub object: Object,
     pub point: Tuple,
+    pub over_point: Tuple,
     pub normalv: Tuple,
     pub eyev: Tuple,
     pub inside: bool,
@@ -27,6 +28,7 @@ impl ComputedIntersection {
         t: f64,
         object: Object,
         point: Tuple,
+        over_point: Tuple,
         normalv: Tuple,
         eyev: Tuple,
         inside: bool,
@@ -35,6 +37,7 @@ impl ComputedIntersection {
             t,
             object,
             point,
+            over_point,
             normalv,
             eyev,
             inside,
@@ -66,7 +69,17 @@ impl Intersection {
             inside = false;
         }
 
-        ComputedIntersection::new(self.t, self.object.clone(), point, normalv, eyev, inside)
+        let over_point = point + normalv * EPSILON;
+
+        ComputedIntersection::new(
+            self.t,
+            self.object.clone(),
+            point,
+            over_point,
+            normalv,
+            eyev,
+            inside,
+        )
     }
 }
 
@@ -108,7 +121,10 @@ impl Index<usize> for Intersections {
 
 #[cfg(test)]
 mod tests {
-    use crate::{intersections::Intersectable, ray::Ray, sphere::Sphere, tuple::Tuple};
+    use crate::{
+        constants::EPSILON, intersections::Intersectable, matrix::Matrix, ray::Ray, sphere::Sphere,
+        tuple::Tuple,
+    };
 
     #[test]
     fn an_intersection_encapsulates_t_and_object() {
@@ -212,5 +228,17 @@ mod tests {
         let i = Sphere::intersections(vec![i1, i2, i3, i4.clone()]);
 
         assert_eq!(i.hit(), Some(i4));
+    }
+
+    #[test]
+    fn the_hit_should_offset_the_point() {
+        let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vector(0., 0., 1.));
+        let shape = Sphere::default().set_transform(Matrix::identity().translation(0., 0., 1.));
+
+        let i = shape.intersection(5.);
+        let comps = i.prepare_computations(&r);
+
+        assert!(comps.over_point.z < -EPSILON / 2.);
+        assert!(comps.point.z > comps.over_point.z);
     }
 }
