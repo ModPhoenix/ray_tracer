@@ -43,15 +43,15 @@ fn main() -> std::io::Result<()> {
         .set_material(
             Material::default()
                 .set_color(Color::new(0.1, 1., 0.5))
-                .set_diffuse(0.7)
-                .set_specular(0.3),
+                .set_diffuse(0.9)
+                .set_specular(0.1),
         )
         .set_transform(Matrix::identity().translation(-0.5, 1., 0.5));
 
     let right = Sphere::default()
         .set_material(
             Material::default()
-                .set_color(Color::new(0.5, 1., 0.1))
+                .set_color(Color::new(1., 0., 0.))
                 .set_diffuse(0.7)
                 .set_specular(0.3),
         )
@@ -64,7 +64,7 @@ fn main() -> std::io::Result<()> {
     let left = Sphere::default()
         .set_material(
             Material::default()
-                .set_color(Color::new(1., 0.8, 0.1))
+                .set_color(Color::new(1., 0., 1.))
                 .set_diffuse(0.7)
                 .set_specular(0.3),
         )
@@ -90,7 +90,7 @@ fn main() -> std::io::Result<()> {
     );
 
     let camera = Camera::new(1500, 1000, PI / 3.).set_transform(Matrix::identity().view_transform(
-        Tuple::point(0., 1.5, -5.),
+        Tuple::point(0., 20., -15.),
         Tuple::point(0., 1., 0.),
         Tuple::vector(0., 1., 0.),
     ));
