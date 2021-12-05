@@ -2,65 +2,100 @@ use std::f64::consts::PI;
 use std::fs::File;
 use std::io::prelude::*;
 
-use ray_tracer::intersections::{Intersectable, Intersections};
+use ray_tracer::camera::Camera;
 use ray_tracer::light::Light;
 use ray_tracer::material::Material;
 use ray_tracer::matrix::Matrix;
-use ray_tracer::ray::Ray;
 use ray_tracer::sphere::Sphere;
-use ray_tracer::world::Normal;
-use ray_tracer::{canvas::Canvas, color::Color, tuple::Tuple};
+use ray_tracer::world::World;
+use ray_tracer::{color::Color, tuple::Tuple};
 
 fn main() -> std::io::Result<()> {
-    let canvas_pixels = 1000;
-    let ray_origin = Tuple::point(0., 0., -5.);
-    let wall_z = 10.;
-    let wall_size = 7.;
-    let pixel_size = wall_size / canvas_pixels as f64;
-    let half = wall_size / 2.;
+    let walls_material = Material::default()
+        .set_color(Color::new(1., 0.9, 0.9))
+        .set_specular(0.);
 
-    let mut canvas = Canvas::new(canvas_pixels, canvas_pixels);
+    let floor = Sphere::default()
+        .set_material(walls_material.clone())
+        .set_transform(Matrix::identity().scaling(10., 0.01, 10.));
 
-    let sphere = Sphere::default()
-        .set_material(Material::default().set_color(Color::new(1., 1.0, 1.0)))
+    let left_wall = Sphere::default()
+        .set_material(walls_material.clone())
         .set_transform(
             Matrix::identity()
-                .scaling(1., 0.6, 0.6)
-                .rotation_y(PI / 1.5)
-                .rotation_z(PI / 1.5),
+                .scaling(10., 0.01, 10.)
+                .rotation_x(PI / 2.)
+                .rotation_y(-PI / 4.)
+                .translation(0., 0., 5.),
         );
 
-    let light_position = Tuple::point(-10., 10., -15.);
-    let light_color = Color::new(1., 1., 1.);
-    let light = Light::new(light_position, light_color);
+    let right_wall = Sphere::default()
+        .set_material(walls_material)
+        .set_transform(
+            Matrix::identity()
+                .scaling(10., 0.01, 10.)
+                .rotation_x(PI / 2.)
+                .rotation_y(PI / 4.)
+                .translation(0., 0., 5.),
+        );
 
-    for y in 0..canvas.height {
-        let world_y = half - pixel_size * y as f64;
-        for x in 0..canvas.width {
-            let world_x = -half + pixel_size * x as f64;
-            let position = Tuple::point(world_x, world_y, wall_z);
+    let middle = Sphere::default()
+        .set_material(
+            Material::default()
+                .set_color(Color::new(0.1, 1., 0.5))
+                .set_diffuse(0.7)
+                .set_specular(0.3),
+        )
+        .set_transform(Matrix::identity().translation(-0.5, 1., 0.5));
 
-            let ray = Ray::new(ray_origin, (position - ray_origin).normalize());
-            let xs = sphere.intersect(&ray);
+    let right = Sphere::default()
+        .set_material(
+            Material::default()
+                .set_color(Color::new(0.5, 1., 0.1))
+                .set_diffuse(0.7)
+                .set_specular(0.3),
+        )
+        .set_transform(
+            Matrix::identity()
+                .scaling(0.5, 0.5, 0.5)
+                .translation(1.5, 0.5, -0.5),
+        );
 
-            if let Some(intersect) = xs {
-                let intersections = Intersections::new(intersect.to_vec());
+    let left = Sphere::default()
+        .set_material(
+            Material::default()
+                .set_color(Color::new(1., 0.8, 0.1))
+                .set_diffuse(0.7)
+                .set_specular(0.3),
+        )
+        .set_transform(
+            Matrix::identity()
+                .scaling(0.33, 0.33, 0.33)
+                .translation(-1.5, 0.33, -0.75),
+        );
 
-                if let Some(hit) = intersections.hit() {
-                    let point = ray.position(hit.t);
-                    let normal = hit.object.normal_at(point);
-                    let eye = -ray.direction;
+    let world = World::new(
+        Some(Light::new(
+            Tuple::point(-10., 10., -10.),
+            Color::new(1., 1., 1.),
+        )),
+        vec![
+            floor.into(),
+            left_wall.into(),
+            right_wall.into(),
+            middle.into(),
+            right.into(),
+            left.into(),
+        ],
+    );
 
-                    let color =
-                        hit.object
-                            .get_material()
-                            .lighting(light.clone(), point, eye, normal);
+    let camera = Camera::new(1500, 1000, PI / 3.).set_transform(Matrix::identity().view_transform(
+        Tuple::point(0., 1.5, -5.),
+        Tuple::point(0., 1., 0.),
+        Tuple::vector(0., 1., 0.),
+    ));
 
-                    canvas.set(x, y, &color);
-                }
-            }
-        }
-    }
+    let canvas = camera.render(world);
 
     let mut file = File::create("output.ppm")?;
     file.write_all(&canvas.to_ppm().as_bytes())?;
