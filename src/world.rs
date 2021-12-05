@@ -278,7 +278,6 @@ mod tests {
 
         let w = World::new(Some(light), vec![s1.into(), s2.into()]);
         let c = w.shade_hit(comps);
-        // let p = Tuple::point(-2., 2., -2.);
 
         assert_eq!(c, Color::new(0.1, 0.1, 0.1));
     }
