@@ -1,4 +1,4 @@
-use crate::{matrix::Matrix, ray::Ray, tuple::Tuple};
+use crate::{canvas::Canvas, matrix::Matrix, ray::Ray, tuple::Tuple, world::World};
 
 #[derive(Debug)]
 pub struct Camera {
@@ -60,15 +60,35 @@ impl Camera {
 
         Ray::new(origin, direction)
     }
+
+    pub fn render(&self, world: World) -> Canvas {
+        let mut image = Canvas::new(self.hsize, self.vsize);
+
+        for y in 0..self.vsize {
+            for x in 0..self.hsize {
+                let ray = self.ray_for_pixel(x, y);
+                let color = world.color_at(&ray);
+
+                image.set(x, y, &color);
+            }
+        }
+
+        image
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use std::f64::consts::PI;
 
+    use crate::color::Color;
+    use crate::light::Light;
+    use crate::material::Material;
     use crate::matrix::Matrix;
+    use crate::sphere::Sphere;
     use crate::tuple::Tuple;
     use crate::utils::fuzzy_equal::fuzzy_equal;
+    use crate::world::World;
 
     use super::Camera;
 
@@ -133,5 +153,33 @@ mod tests {
             r.direction,
             Tuple::vector(2.0_f64.sqrt() / 2., 0., -2.0_f64.sqrt() / 2.)
         );
+    }
+
+    fn default_world() -> World {
+        let light = Light::new(Tuple::point(-10., 10., -10.), Color::new(1., 1., 1.));
+        let s1 = Sphere::default().set_material(
+            Material::default()
+                .set_color(Color::new(0.8, 1.0, 0.6))
+                .set_diffuse(0.7)
+                .set_specular(0.2),
+        );
+        let s2 = Sphere::default().set_transform(Matrix::identity().scaling(0.5, 0.5, 0.5));
+
+        World::new(Some(light), vec![s1.into(), s2.into()])
+    }
+
+    #[test]
+    fn rendering_a_world_with_a_camera() {
+        let w = default_world();
+
+        let from = Tuple::point(0., 0., -5.);
+        let to = Tuple::point(0., 0., 0.);
+        let up = Tuple::vector(0., 1., 0.);
+        let c = Camera::new(11, 11, PI / 2.)
+            .set_transform(Matrix::identity().view_transform(from, to, up));
+
+        let image = c.render(w);
+
+        assert_eq!(image.get(5, 5), &Color::new(0.38066, 0.47583, 0.2855));
     }
 }
