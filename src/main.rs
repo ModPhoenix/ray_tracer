@@ -89,11 +89,15 @@ fn main() -> std::io::Result<()> {
         ],
     );
 
-    let camera = Camera::new(1500, 1000, PI / 3.).set_transform(Matrix::identity().view_transform(
-        Tuple::point(0., 20., -15.),
-        Tuple::point(0., 1., 0.),
-        Tuple::vector(0., 1., 0.),
-    ));
+    // 4K - 4096 × 3112
+    // 8K - 7680 × 4320
+
+    let camera =
+        Camera::new(4096, 3112, PI / 3.5).set_transform(Matrix::identity().view_transform(
+            Tuple::point(0., 20., -15.),
+            Tuple::point(0., 1., 0.),
+            Tuple::vector(0., 1., 0.),
+        ));
 
     let canvas = camera.render(world);
 
