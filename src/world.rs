@@ -27,7 +27,7 @@ impl World {
         self
     }
 
-    pub fn intersect(&self, ray: &Ray) -> Intersections {
+    pub fn intersect_world(&self, ray: &Ray) -> Intersections {
         let xs = self.objects.iter().fold(vec![], |mut acc, object| {
             if let Some(intersection) = object.intersect(ray) {
                 acc.extend(intersection);
@@ -50,7 +50,7 @@ impl World {
     }
 
     pub fn color_at(&self, ray: &Ray) -> Color {
-        let xs = self.intersect(ray);
+        let xs = self.intersect_world(ray);
         match xs.hit() {
             Some(intersection) => {
                 let comps = intersection.prepare_computations(ray);
@@ -58,6 +58,25 @@ impl World {
             }
             None => Color::new_black(),
         }
+    }
+
+    pub fn is_shadowed(&self, point: Tuple) -> bool {
+        let v = self.light.as_ref().unwrap().position - point;
+        let distance = v.magnitude();
+        let direction = v.normalize();
+
+        let r = Ray::new(point, direction);
+        let intersections = self.intersect_world(&r);
+
+        let h = intersections.hit();
+
+        if let Some(intersection) = h {
+            if intersection.t < distance {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 
@@ -122,7 +141,7 @@ mod tests {
     fn intersect_a_world_with_a_ray() {
         let w = default_world();
         let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vector(0., 0., 1.));
-        let xs = w.intersect(&r);
+        let xs = w.intersect_world(&r);
 
         assert_eq!(xs.len(), 4);
         assert_eq!(xs[0].t, 4.);
@@ -206,5 +225,37 @@ mod tests {
         let c = w.clone().color_at(&r);
 
         assert_eq!(c, inner.clone().get_material().clone().get_color());
+    }
+
+    #[test]
+    fn there_is_no_shadow_when_nothing_is_collinear_with_point_and_light() {
+        let w = default_world();
+        let p = Tuple::point(0., 10., 0.);
+
+        assert_eq!(w.is_shadowed(p), false);
+    }
+
+    #[test]
+    fn the_shadow_when_an_object_is_between_the_point_and_the_light() {
+        let w = default_world();
+        let p = Tuple::point(10., -10., 10.);
+
+        assert_eq!(w.is_shadowed(p), true);
+    }
+
+    #[test]
+    fn there_is_no_shadow_when_an_object_is_behind_the_light() {
+        let w = default_world();
+        let p = Tuple::point(-20., 20., -20.);
+
+        assert_eq!(w.is_shadowed(p), false);
+    }
+
+    #[test]
+    fn there_is_no_shadow_when_an_object_is_behind_the_point() {
+        let w = default_world();
+        let p = Tuple::point(-2., 2., -2.);
+
+        assert_eq!(w.is_shadowed(p), false);
     }
 }
