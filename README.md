@@ -4,11 +4,11 @@ Ray tracer written on Rust, based on the book ["The Ray Tracer Challenge" by Jam
 
 ## What can the ray tracer do currently?
 
-For now it can render scene using virtual "world" and camera into .ppm image format. World can hold one light source and any number of objects.
+For now it can render scene using virtual "world" and camera into .ppm image format. World can hold one light source and any number of graphic primitives.
 
 You can apply various transformations and material settings to the object. All of these factors will affect the final pixel color in the final picture.
 
-### Available objects
+### Available graphic primitives
 
 - Spheres
 

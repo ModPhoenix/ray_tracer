@@ -1,23 +1,20 @@
 use crate::color::Color;
-use crate::intersections::{ComputedIntersection, Intersectable, Intersections};
-use crate::object::Object;
+use crate::intersections::{ComputedIntersection, Intersections};
 use crate::ray::Ray;
+use crate::shape::{Shape, Shapes};
+
 use crate::tuple::Tuple;
 
 use crate::light::Light;
 
-pub trait Normal {
-    fn normal_at(&self, world_point: Tuple) -> Tuple;
-}
-
 #[derive(Debug, Clone)]
 pub struct World {
     light: Option<Light>,
-    objects: Vec<Object>,
+    objects: Vec<Shapes>,
 }
 
 impl World {
-    pub fn new(light: Option<Light>, objects: Vec<Object>) -> Self {
+    pub fn new(light: Option<Light>, objects: Vec<Shapes>) -> Self {
         Self { light, objects }
     }
 
@@ -95,14 +92,8 @@ impl Default for World {
 mod tests {
 
     use crate::{
-        color::Color,
-        intersections::{Intersectable, Intersection},
-        light::Light,
-        material::Material,
-        matrix::Matrix,
-        ray::Ray,
-        sphere::Sphere,
-        tuple::Tuple,
+        color::Color, intersections::Intersection, light::Light, material::Material,
+        matrix::Matrix, ray::Ray, shape::Shape, sphere::Sphere, tuple::Tuple,
     };
 
     use super::World;

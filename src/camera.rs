@@ -85,6 +85,7 @@ mod tests {
     use crate::light::Light;
     use crate::material::Material;
     use crate::matrix::Matrix;
+    use crate::shape::Shape;
     use crate::sphere::Sphere;
     use crate::tuple::Tuple;
     use crate::utils::fuzzy_equal::fuzzy_equal;

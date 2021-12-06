@@ -1,21 +1,16 @@
 use std::ops::Index;
 
-use crate::{constants::EPSILON, object::Object, ray::Ray, tuple::Tuple, world::Normal};
-
-pub trait Intersectable {
-    fn intersection(&self, t: f64) -> Intersection;
-
-    fn intersections(intersections: Vec<Intersection>) -> Intersections {
-        Intersections::new(intersections)
-    }
-
-    fn intersect(&self, ray: &Ray) -> Option<Vec<Intersection>>;
-}
+use crate::{
+    constants::EPSILON,
+    ray::Ray,
+    shape::{Shape, Shapes},
+    tuple::Tuple,
+};
 
 #[derive(Debug, Clone)]
 pub struct ComputedIntersection {
     pub t: f64,
-    pub object: Object,
+    pub object: Shapes,
     pub point: Tuple,
     pub over_point: Tuple,
     pub normalv: Tuple,
@@ -26,7 +21,7 @@ pub struct ComputedIntersection {
 impl ComputedIntersection {
     pub fn new(
         t: f64,
-        object: Object,
+        object: Shapes,
         point: Tuple,
         over_point: Tuple,
         normalv: Tuple,
@@ -48,11 +43,11 @@ impl ComputedIntersection {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Intersection {
     pub t: f64,
-    pub object: Object,
+    pub object: Shapes,
 }
 
 impl Intersection {
-    pub fn new(t: f64, object: Object) -> Self {
+    pub fn new(t: f64, object: Shapes) -> Self {
         Self { t, object }
     }
 
@@ -122,8 +117,8 @@ impl Index<usize> for Intersections {
 #[cfg(test)]
 mod tests {
     use crate::{
-        constants::EPSILON, intersections::Intersectable, matrix::Matrix, ray::Ray, sphere::Sphere,
-        tuple::Tuple,
+        constants::EPSILON, intersections::Intersections, matrix::Matrix, ray::Ray, shape::Shape,
+        sphere::Sphere, tuple::Tuple,
     };
 
     #[test]
@@ -181,7 +176,7 @@ mod tests {
         let s = Sphere::default();
         let i1 = s.intersection(1.0);
         let i2 = s.intersection(2.0);
-        let xs = Sphere::intersections(vec![i1, i2]);
+        let xs = Intersections::new(vec![i1, i2]);
 
         assert_eq!(xs.len(), 2);
         assert_eq!(xs[0].t, 1.);
@@ -193,7 +188,7 @@ mod tests {
         let s = Sphere::default();
         let i1 = s.intersection(1.0);
         let i2 = s.intersection(2.0);
-        let i = Sphere::intersections(vec![i2, i1.clone()]);
+        let i = Intersections::new(vec![i2, i1.clone()]);
 
         assert_eq!(i.hit(), Some(i1));
     }
@@ -203,7 +198,7 @@ mod tests {
         let s = Sphere::default();
         let i1 = s.intersection(-1.0);
         let i2 = s.intersection(1.0);
-        let i = Sphere::intersections(vec![i2.clone(), i1]);
+        let i = Intersections::new(vec![i2.clone(), i1]);
 
         assert_eq!(i.hit(), Some(i2));
     }
@@ -213,7 +208,7 @@ mod tests {
         let s = Sphere::default();
         let i1 = s.intersection(-2.0);
         let i2 = s.intersection(-1.0);
-        let i = Sphere::intersections(vec![i2, i1]);
+        let i = Intersections::new(vec![i2, i1]);
 
         assert_eq!(i.hit(), None);
     }
@@ -225,7 +220,7 @@ mod tests {
         let i2 = s.intersection(7.0);
         let i3 = s.intersection(-3.0);
         let i4 = s.intersection(2.0);
-        let i = Sphere::intersections(vec![i1, i2, i3, i4.clone()]);
+        let i = Intersections::new(vec![i1, i2, i3, i4.clone()]);
 
         assert_eq!(i.hit(), Some(i4));
     }

@@ -1,11 +1,4 @@
-use crate::{
-    intersections::{Intersectable, Intersection},
-    material::Material,
-    matrix::Matrix,
-    ray::Ray,
-    tuple::Tuple,
-    world::Normal,
-};
+use crate::{intersections::Intersection, material::Material, matrix::Matrix, shape::Shape};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Sphere {
@@ -20,16 +13,6 @@ impl Sphere {
             material,
         }
     }
-
-    pub fn set_material(mut self, material: Material) -> Self {
-        self.material = material;
-        self
-    }
-
-    pub fn set_transform(mut self, transform: Matrix<4>) -> Self {
-        self.transform = transform;
-        self
-    }
 }
 
 impl Default for Sphere {
@@ -38,41 +21,27 @@ impl Default for Sphere {
     }
 }
 
-impl Normal for Sphere {
-    fn normal_at(&self, world_point: Tuple) -> Tuple {
-        let object_point = self.transform.inverse() * world_point;
-        let object_normal = object_point - Tuple::point(0., 0., 0.);
-        let mut world_normal = self.transform.inverse().transpose() * object_normal;
-
-        world_normal.w = 0.;
-
-        world_normal.normalize()
+impl Shape for Sphere {
+    fn get_material(&self) -> Material {
+        self.material.clone()
     }
-}
 
-impl Intersectable for Sphere {
+    fn set_material(&mut self, material: Material) -> Self {
+        self.material = material;
+        self.clone()
+    }
+
+    fn get_transform(&self) -> Matrix<4> {
+        self.transform.clone()
+    }
+
+    fn set_transform(&mut self, transform: Matrix<4>) -> Self {
+        self.transform = transform;
+        self.clone()
+    }
+
     fn intersection(&self, t: f64) -> Intersection {
         Intersection::new(t, self.clone().into())
-    }
-
-    fn intersect(&self, ray: &Ray) -> Option<Vec<Intersection>> {
-        let ray_transformed = ray.transform(self.transform.inverse());
-
-        let sphere_to_ray = ray_transformed.origin - Tuple::point(0., 0., 0.);
-        let a = Tuple::dot(&ray_transformed.direction, &ray_transformed.direction);
-        let b = 2.0 * Tuple::dot(&ray_transformed.direction, &sphere_to_ray);
-        let c = Tuple::dot(&sphere_to_ray, &sphere_to_ray) - 1.0;
-
-        let discriminant = b.powf(2.0) - 4.0 * a * c;
-
-        if discriminant < 0.0 {
-            return None;
-        } else {
-            let t1 = (-b - discriminant.sqrt()) / (2.0 * a);
-            let t2 = (-b + discriminant.sqrt()) / (2.0 * a);
-
-            return Some(vec![self.intersection(t1), self.intersection(t2)]);
-        }
     }
 }
 
@@ -81,8 +50,7 @@ mod tests {
     use std::f64::consts::PI;
 
     use crate::{
-        intersections::Intersectable, material::Material, matrix::Matrix, ray::Ray, sphere::Sphere,
-        tuple::Tuple, world::Normal,
+        material::Material, matrix::Matrix, ray::Ray, shape::Shape, sphere::Sphere, tuple::Tuple,
     };
 
     #[test]

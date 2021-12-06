@@ -6,6 +6,7 @@ use ray_tracer::camera::Camera;
 use ray_tracer::light::Light;
 use ray_tracer::material::Material;
 use ray_tracer::matrix::Matrix;
+use ray_tracer::shape::Shape;
 use ray_tracer::sphere::Sphere;
 use ray_tracer::world::World;
 use ray_tracer::{color::Color, tuple::Tuple};
@@ -93,8 +94,8 @@ fn main() -> std::io::Result<()> {
     // 8K - 7680 × 4320
 
     let camera =
-        Camera::new(4096, 3112, PI / 3.5).set_transform(Matrix::identity().view_transform(
-            Tuple::point(0., 2., -7.),
+        Camera::new(1500, 1000, PI / 3.5).set_transform(Matrix::identity().view_transform(
+            Tuple::point(0., 2., -10.),
             Tuple::point(0., 1., 0.),
             Tuple::vector(0., 1., 0.),
         ));
