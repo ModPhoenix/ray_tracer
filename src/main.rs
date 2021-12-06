@@ -6,6 +6,7 @@ use ray_tracer::camera::Camera;
 use ray_tracer::light::Light;
 use ray_tracer::material::Material;
 use ray_tracer::matrix::Matrix;
+use ray_tracer::plane::Plane;
 use ray_tracer::shape::Shape;
 use ray_tracer::sphere::Sphere;
 use ray_tracer::world::World;
@@ -16,29 +17,7 @@ fn main() -> std::io::Result<()> {
         .set_color(Color::new(1., 0.9, 0.9))
         .set_specular(0.);
 
-    let floor = Sphere::default()
-        .set_material(walls_material.clone())
-        .set_transform(Matrix::identity().scaling(10., 0.01, 10.));
-
-    let left_wall = Sphere::default()
-        .set_material(walls_material.clone())
-        .set_transform(
-            Matrix::identity()
-                .scaling(10., 0.01, 10.)
-                .rotation_x(PI / 2.)
-                .rotation_y(-PI / 4.)
-                .translation(0., 0., 5.),
-        );
-
-    let right_wall = Sphere::default()
-        .set_material(walls_material)
-        .set_transform(
-            Matrix::identity()
-                .scaling(10., 0.01, 10.)
-                .rotation_x(PI / 2.)
-                .rotation_y(PI / 4.)
-                .translation(0., 0., 5.),
-        );
+    let floor = Plane::default().set_material(walls_material);
 
     let middle = Sphere::default()
         .set_material(
@@ -80,14 +59,7 @@ fn main() -> std::io::Result<()> {
             Tuple::point(-10., 10., -10.),
             Color::new(1., 1., 1.),
         )),
-        vec![
-            floor.into(),
-            left_wall.into(),
-            right_wall.into(),
-            middle.into(),
-            right.into(),
-            left.into(),
-        ],
+        vec![floor.into(), middle.into(), right.into(), left.into()],
     );
 
     // 4K - 4096 × 3112
@@ -95,7 +67,7 @@ fn main() -> std::io::Result<()> {
 
     let camera =
         Camera::new(1500, 1000, PI / 3.5).set_transform(Matrix::identity().view_transform(
-            Tuple::point(0., 2., -10.),
+            Tuple::point(0., 100., -1000.),
             Tuple::point(0., 1., 0.),
             Tuple::vector(0., 1., 0.),
         ));

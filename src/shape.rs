@@ -1,6 +1,6 @@
 use crate::{
-    intersections::Intersection, material::Material, matrix::Matrix, ray::Ray, sphere::Sphere,
-    tuple::Tuple,
+    intersections::Intersection, material::Material, matrix::Matrix, plane::Plane, ray::Ray,
+    sphere::Sphere, tuple::Tuple,
 };
 
 pub trait Shape {
@@ -36,12 +36,14 @@ pub trait Shape {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Shapes {
     Sphere(Sphere),
+    Plane(Plane),
 }
 
 impl Shapes {
     pub fn get_material(self) -> Material {
         match self {
             Shapes::Sphere(sphere) => sphere.material,
+            Shapes::Plane(plane) => plane.material,
         }
     }
 }
@@ -50,42 +52,49 @@ impl Shape for Shapes {
     fn get_material(&self) -> Material {
         match self {
             Shapes::Sphere(sphere) => sphere.get_material(),
+            Shapes::Plane(plane) => plane.get_material(),
         }
     }
 
     fn set_material(&mut self, material: Material) -> Self {
         match self {
             Shapes::Sphere(sphere) => sphere.set_material(material).into(),
+            Shapes::Plane(plane) => plane.set_material(material).into(),
         }
     }
 
     fn get_transform(&self) -> crate::matrix::Matrix<4> {
         match self {
             Shapes::Sphere(sphere) => sphere.get_transform(),
+            Shapes::Plane(plane) => plane.get_transform(),
         }
     }
 
     fn set_transform(&mut self, transform: crate::matrix::Matrix<4>) -> Self {
         match self {
             Shapes::Sphere(sphere) => sphere.set_transform(transform).into(),
+            Shapes::Plane(plane) => plane.set_transform(transform).into(),
         }
     }
 
     fn intersection(&self, t: f64) -> Intersection {
         match self {
             Shapes::Sphere(sphere) => sphere.intersection(t),
+            Shapes::Plane(plane) => plane.intersection(t),
         }
     }
 
     fn local_intersect(&self, local_ray: &Ray) -> Option<Vec<Intersection>> {
         match self {
             Shapes::Sphere(sphere) => sphere.local_intersect(local_ray),
+            Shapes::Plane(plane) => plane.local_intersect(local_ray),
         }
     }
 
     fn local_normal_at(&self, local_point: Tuple) -> Tuple {
         match self {
             Shapes::Sphere(sphere) => sphere.local_normal_at(local_point),
+            Shapes::Plane(plane) => plane.local_normal_at(local_point),
         }
     }
 }
@@ -93,5 +102,11 @@ impl Shape for Shapes {
 impl From<Sphere> for Shapes {
     fn from(sphere: Sphere) -> Self {
         Shapes::Sphere(sphere)
+    }
+}
+
+impl From<Plane> for Shapes {
+    fn from(plane: Plane) -> Self {
+        Shapes::Plane(plane)
     }
 }
