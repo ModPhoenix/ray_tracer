@@ -1,4 +1,6 @@
-use crate::{intersections::Intersection, material::Material, matrix::Matrix, shape::Shape};
+use crate::{
+    intersections::Intersection, material::Material, matrix::Matrix, shape::Shape, tuple::Tuple,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Sphere {
@@ -42,6 +44,28 @@ impl Shape for Sphere {
 
     fn intersection(&self, t: f64) -> Intersection {
         Intersection::new(t, self.clone().into())
+    }
+
+    fn local_intersect(&self, local_ray: &crate::ray::Ray) -> Option<Vec<Intersection>> {
+        let sphere_to_ray = local_ray.origin - Tuple::point(0., 0., 0.);
+        let a = Tuple::dot(&local_ray.direction, &local_ray.direction);
+        let b = 2.0 * Tuple::dot(&local_ray.direction, &sphere_to_ray);
+        let c = Tuple::dot(&sphere_to_ray, &sphere_to_ray) - 1.0;
+
+        let discriminant = b.powf(2.0) - 4.0 * a * c;
+
+        if discriminant < 0.0 {
+            return None;
+        } else {
+            let t1 = (-b - discriminant.sqrt()) / (2.0 * a);
+            let t2 = (-b + discriminant.sqrt()) / (2.0 * a);
+
+            return Some(vec![self.intersection(t1), self.intersection(t2)]);
+        }
+    }
+
+    fn local_normal_at(&self, local_point: Tuple) -> Tuple {
+        local_point - Tuple::point(0., 0., 0.)
     }
 }
 

@@ -14,31 +14,18 @@ pub trait Shape {
 
     // intersection
     fn intersection(&self, t: f64) -> Intersection;
+    fn local_intersect(&self, local_ray: &Ray) -> Option<Vec<Intersection>>;
     fn intersect(&self, ray: &Ray) -> Option<Vec<Intersection>> {
-        let ray_transformed = ray.transform(self.get_transform().inverse());
-
-        let sphere_to_ray = ray_transformed.origin - Tuple::point(0., 0., 0.);
-        let a = Tuple::dot(&ray_transformed.direction, &ray_transformed.direction);
-        let b = 2.0 * Tuple::dot(&ray_transformed.direction, &sphere_to_ray);
-        let c = Tuple::dot(&sphere_to_ray, &sphere_to_ray) - 1.0;
-
-        let discriminant = b.powf(2.0) - 4.0 * a * c;
-
-        if discriminant < 0.0 {
-            return None;
-        } else {
-            let t1 = (-b - discriminant.sqrt()) / (2.0 * a);
-            let t2 = (-b + discriminant.sqrt()) / (2.0 * a);
-
-            return Some(vec![self.intersection(t1), self.intersection(t2)]);
-        }
+        let local_ray = ray.transform(self.get_transform().inverse());
+        self.local_intersect(&local_ray)
     }
 
     // normal
+    fn local_normal_at(&self, local_point: Tuple) -> Tuple;
     fn normal_at(&self, world_point: Tuple) -> Tuple {
-        let object_point = self.get_transform().inverse() * world_point;
-        let object_normal = object_point - Tuple::point(0., 0., 0.);
-        let mut world_normal = self.get_transform().inverse().transpose() * object_normal;
+        let local_point = self.get_transform().inverse() * world_point;
+        let local_normal = self.local_normal_at(local_point);
+        let mut world_normal = self.get_transform().inverse().transpose() * local_normal;
 
         world_normal.w = 0.;
 
@@ -87,6 +74,18 @@ impl Shape for Shapes {
     fn intersection(&self, t: f64) -> Intersection {
         match self {
             Shapes::Sphere(sphere) => sphere.intersection(t),
+        }
+    }
+
+    fn local_intersect(&self, local_ray: &Ray) -> Option<Vec<Intersection>> {
+        match self {
+            Shapes::Sphere(sphere) => sphere.local_intersect(local_ray),
+        }
+    }
+
+    fn local_normal_at(&self, local_point: Tuple) -> Tuple {
+        match self {
+            Shapes::Sphere(sphere) => sphere.local_normal_at(local_point),
         }
     }
 }
