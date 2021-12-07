@@ -1,4 +1,4 @@
-use crate::{color::Color, light::Light, pattern::Pattern, tuple::Tuple};
+use crate::{color::Color, light::Light, pattern::Pattern, shape::Shapes, tuple::Tuple};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Material {
@@ -65,6 +65,7 @@ impl Material {
 
     pub fn lighting(
         &self,
+        object: Shapes,
         light: Light,
         point: Tuple,
         eyev: Tuple,
@@ -77,7 +78,7 @@ impl Material {
         let color: Color;
 
         if let Some(pattern) = self.pattern.clone() {
-            color = pattern.stripe_at(point);
+            color = pattern.stripe_at_object(object, point);
         } else {
             color = self.color.clone();
         }
@@ -130,7 +131,10 @@ impl Default for Material {
 
 #[cfg(test)]
 mod tests {
-    use crate::{color::Color, light::Light, material::Material, pattern::Pattern, tuple::Tuple};
+    use crate::{
+        color::Color, light::Light, material::Material, pattern::Pattern, sphere::Sphere,
+        tuple::Tuple,
+    };
 
     #[test]
     fn the_default_material() {
@@ -152,7 +156,14 @@ mod tests {
         let normalv = Tuple::vector(0., 0., -1.);
         let light = Light::new(Tuple::point(0., 0., -10.), Color::new(1., 1., 1.));
 
-        let result = m.lighting(light, position, eyev, normalv, false);
+        let result = m.lighting(
+            Sphere::default().into(),
+            light,
+            position,
+            eyev,
+            normalv,
+            false,
+        );
 
         assert_eq!(result, Color::new(1.9, 1.9, 1.9));
     }
@@ -166,7 +177,14 @@ mod tests {
         let normalv = Tuple::vector(0., 0., -1.);
         let light = Light::new(Tuple::point(0., 0., -10.), Color::new(1., 1., 1.));
 
-        let result = m.lighting(light, position, eyev, normalv, false);
+        let result = m.lighting(
+            Sphere::default().into(),
+            light,
+            position,
+            eyev,
+            normalv,
+            false,
+        );
 
         assert_eq!(result, Color::new(1., 1., 1.));
     }
@@ -180,7 +198,14 @@ mod tests {
         let normalv = Tuple::vector(0., 0., -1.);
         let light = Light::new(Tuple::point(0., 10., -10.), Color::new(1., 1., 1.));
 
-        let result = m.lighting(light, position, eyev, normalv, false);
+        let result = m.lighting(
+            Sphere::default().into(),
+            light,
+            position,
+            eyev,
+            normalv,
+            false,
+        );
 
         assert_eq!(result, Color::new(0.7364, 0.7364, 0.7364));
     }
@@ -194,7 +219,14 @@ mod tests {
         let normalv = Tuple::vector(0., 0., -1.);
         let light = Light::new(Tuple::point(0., 10., -10.), Color::new(1., 1., 1.));
 
-        let result = m.lighting(light, position, eyev, normalv, false);
+        let result = m.lighting(
+            Sphere::default().into(),
+            light,
+            position,
+            eyev,
+            normalv,
+            false,
+        );
 
         assert_eq!(result, Color::new(1.6364, 1.6364, 1.6364));
     }
@@ -208,7 +240,14 @@ mod tests {
         let normalv = Tuple::vector(0., 0., -1.);
         let light = Light::new(Tuple::point(0., 0., 10.), Color::new(1., 1., 1.));
 
-        let result = m.lighting(light, position, eyev, normalv, false);
+        let result = m.lighting(
+            Sphere::default().into(),
+            light,
+            position,
+            eyev,
+            normalv,
+            false,
+        );
 
         assert_eq!(result, Color::new(0.1, 0.1, 0.1));
     }
@@ -223,7 +262,14 @@ mod tests {
         let light = Light::new(Tuple::point(0., 0., -10.), Color::new(1., 1., 1.));
         let in_shadow = true;
 
-        let result = m.lighting(light, position, eyev, normalv, in_shadow);
+        let result = m.lighting(
+            Sphere::default().into(),
+            light,
+            position,
+            eyev,
+            normalv,
+            in_shadow,
+        );
 
         assert_eq!(result, Color::new(0.1, 0.1, 0.1));
     }
@@ -244,13 +290,21 @@ mod tests {
         let light = Light::new(Tuple::point(0., 0., -10.), Color::new_white());
 
         let c1 = m.lighting(
+            Sphere::default().into(),
             light.clone(),
             Tuple::point(0.9, 0., 0.),
             eyev,
             normalv,
             false,
         );
-        let c2 = m.lighting(light, Tuple::point(1.1, 0., 0.), eyev, normalv, false);
+        let c2 = m.lighting(
+            Sphere::default().into(),
+            light,
+            Tuple::point(1.1, 0., 0.),
+            eyev,
+            normalv,
+            false,
+        );
 
         assert_eq!(c1, Color::new_white());
         assert_eq!(c2, Color::new_black());

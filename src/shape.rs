@@ -33,6 +33,7 @@ pub trait Shape {
     }
 }
 
+// TODO: rename to Object
 #[derive(Debug, Clone, PartialEq)]
 pub enum Shapes {
     Sphere(Sphere),
