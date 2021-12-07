@@ -22,6 +22,14 @@ impl Color {
         }
     }
 
+    pub fn new_white() -> Self {
+        Self {
+            red: 1.0,
+            green: 1.0,
+            blue: 1.0,
+        }
+    }
+
     pub fn rgb(&self) -> RGB {
         RGB::new(
             Self::value_to_rgb(self.red),

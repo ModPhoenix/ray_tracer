@@ -1,4 +1,4 @@
-use crate::{color::Color, light::Light, tuple::Tuple};
+use crate::{color::Color, light::Light, pattern::Pattern, tuple::Tuple};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Material {
@@ -7,16 +7,25 @@ pub struct Material {
     diffuse: f64,
     specular: f64,
     shininess: f64,
+    pattern: Option<Pattern>,
 }
 
 impl Material {
-    pub fn new(color: Color, ambient: f64, diffuse: f64, specular: f64, shininess: f64) -> Self {
+    pub fn new(
+        color: Color,
+        ambient: f64,
+        diffuse: f64,
+        specular: f64,
+        shininess: f64,
+        pattern: Option<Pattern>,
+    ) -> Self {
         Self {
             color,
             ambient,
             diffuse,
             specular,
             shininess,
+            pattern,
         }
     }
 
@@ -49,8 +58,13 @@ impl Material {
         self
     }
 
+    pub fn set_pattern(mut self, pattern: Pattern) -> Self {
+        self.pattern = Some(pattern);
+        self
+    }
+
     pub fn lighting(
-        self,
+        &self,
         light: Light,
         point: Tuple,
         eyev: Tuple,
@@ -60,8 +74,15 @@ impl Material {
         let ambient: Color;
         let diffuse: Color;
         let specular: Color;
+        let color: Color;
 
-        let effective_color = self.color * light.intensity.clone();
+        if let Some(pattern) = self.pattern.clone() {
+            color = pattern.stripe_at(point);
+        } else {
+            color = self.color.clone();
+        }
+
+        let effective_color = color * light.intensity.clone();
         let lightv = (light.position - point).normalize();
 
         ambient = effective_color.clone() * self.ambient;
@@ -102,13 +123,14 @@ impl Default for Material {
             diffuse: 0.9,
             specular: 0.9,
             shininess: 200.0,
+            pattern: None,
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{color::Color, light::Light, material::Material, tuple::Tuple};
+    use crate::{color::Color, light::Light, material::Material, pattern::Pattern, tuple::Tuple};
 
     #[test]
     fn the_default_material() {
@@ -204,5 +226,33 @@ mod tests {
         let result = m.lighting(light, position, eyev, normalv, in_shadow);
 
         assert_eq!(result, Color::new(0.1, 0.1, 0.1));
+    }
+
+    #[test]
+    fn lighting_with_a_pattern_applied() {
+        let m = Material::default()
+            .set_pattern(Pattern::stripe_pattern(
+                Color::new_white(),
+                Color::new_black(),
+            ))
+            .set_ambient(1.)
+            .set_diffuse(0.)
+            .set_specular(0.);
+
+        let eyev = Tuple::vector(0., 0., -1.);
+        let normalv = Tuple::vector(0., 0., -1.);
+        let light = Light::new(Tuple::point(0., 0., -10.), Color::new_white());
+
+        let c1 = m.lighting(
+            light.clone(),
+            Tuple::point(0.9, 0., 0.),
+            eyev,
+            normalv,
+            false,
+        );
+        let c2 = m.lighting(light, Tuple::point(1.1, 0., 0.), eyev, normalv, false);
+
+        assert_eq!(c1, Color::new_white());
+        assert_eq!(c2, Color::new_black());
     }
 }
