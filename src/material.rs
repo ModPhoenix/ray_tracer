@@ -1,4 +1,10 @@
-use crate::{color::Color, light::Light, pattern::Pattern, shape::Shapes, tuple::Tuple};
+use crate::{
+    color::Color,
+    light::Light,
+    patterns::{Pattern, Patterns},
+    shape::Shapes,
+    tuple::Tuple,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Material {
@@ -7,7 +13,7 @@ pub struct Material {
     diffuse: f64,
     specular: f64,
     shininess: f64,
-    pattern: Option<Pattern>,
+    pattern: Option<Patterns>,
 }
 
 impl Material {
@@ -17,7 +23,7 @@ impl Material {
         diffuse: f64,
         specular: f64,
         shininess: f64,
-        pattern: Option<Pattern>,
+        pattern: Option<Patterns>,
     ) -> Self {
         Self {
             color,
@@ -58,7 +64,7 @@ impl Material {
         self
     }
 
-    pub fn set_pattern(mut self, pattern: Pattern) -> Self {
+    pub fn set_pattern(mut self, pattern: Patterns) -> Self {
         self.pattern = Some(pattern);
         self
     }
@@ -78,7 +84,7 @@ impl Material {
         let color: Color;
 
         if let Some(pattern) = self.pattern.clone() {
-            color = pattern.stripe_at_object(object, point);
+            color = pattern.pattern_at_shape(object, point);
         } else {
             color = self.color.clone();
         }
@@ -132,7 +138,7 @@ impl Default for Material {
 #[cfg(test)]
 mod tests {
     use crate::{
-        color::Color, light::Light, material::Material, pattern::Pattern, sphere::Sphere,
+        color::Color, light::Light, material::Material, patterns::stripe::Stripe, sphere::Sphere,
         tuple::Tuple,
     };
 
@@ -277,10 +283,7 @@ mod tests {
     #[test]
     fn lighting_with_a_pattern_applied() {
         let m = Material::default()
-            .set_pattern(Pattern::stripe_pattern(
-                Color::new_white(),
-                Color::new_black(),
-            ))
+            .set_pattern(Stripe::new(Color::new_white(), Color::new_black()).into())
             .set_ambient(1.)
             .set_diffuse(0.)
             .set_specular(0.);

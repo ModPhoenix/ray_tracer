@@ -6,7 +6,8 @@ use ray_tracer::camera::Camera;
 use ray_tracer::light::Light;
 use ray_tracer::material::Material;
 use ray_tracer::matrix::Matrix;
-use ray_tracer::pattern::Pattern;
+use ray_tracer::patterns::stripe::Stripe;
+use ray_tracer::patterns::Pattern;
 use ray_tracer::plane::Plane;
 use ray_tracer::shape::Shape;
 use ray_tracer::sphere::Sphere;
@@ -18,8 +19,9 @@ fn main() -> std::io::Result<()> {
         .set_color(Color::new(1., 0.9, 0.9))
         .set_specular(0.)
         .set_pattern(
-            Pattern::stripe_pattern(Color::new_white(), Color::new(1., 0., 0.))
-                .set_transform(Matrix::identity().scaling(0.5, 0.1, 0.1)),
+            Stripe::new(Color::new_white(), Color::new(1., 0., 0.))
+                .set_transform(Matrix::identity().scaling(0.5, 0.1, 0.1))
+                .into(),
         );
 
     let floor = Plane::default().set_material(walls_material);
@@ -31,13 +33,14 @@ fn main() -> std::io::Result<()> {
                 .set_diffuse(0.9)
                 .set_specular(0.1)
                 .set_pattern(
-                    Pattern::stripe_pattern(Color::new_white(), Color::new(0., 0.8, 0.))
+                    Stripe::new(Color::new_white(), Color::new(0., 0.8, 0.))
                         .set_transform(
                             Matrix::identity()
                                 .rotation_y(PI / 2.)
                                 .rotation_x(PI / 2.)
                                 .scaling(0.1, 0.1, 0.1),
-                        ),
+                        )
+                        .into(),
                 ),
         )
         .set_transform(Matrix::identity().translation(-0.5, 1., 1.5));
@@ -49,8 +52,9 @@ fn main() -> std::io::Result<()> {
                 .set_diffuse(0.7)
                 .set_specular(0.3)
                 .set_pattern(
-                    Pattern::stripe_pattern(Color::new(0., 1., 1.), Color::new(1., 1., 0.))
-                        .set_transform(Matrix::identity().rotation_y(PI / 2.).rotation_x(PI / 2.)),
+                    Stripe::new(Color::new(0., 1., 1.), Color::new(1., 1., 0.))
+                        .set_transform(Matrix::identity().rotation_y(PI / 2.).rotation_x(PI / 2.))
+                        .into(),
                 ),
         )
         .set_transform(
@@ -83,12 +87,11 @@ fn main() -> std::io::Result<()> {
     // 4K - 4096 × 3112
     // 8K - 7680 × 4320
 
-    let camera =
-        Camera::new(1500, 1000, PI / 3.5).set_transform(Matrix::identity().view_transform(
-            Tuple::point(0., 2., -10.),
-            Tuple::point(0., 1., 0.),
-            Tuple::vector(0., 1., 0.),
-        ));
+    let camera = Camera::new(1500, 1000, PI / 3.).set_transform(Matrix::identity().view_transform(
+        Tuple::point(0., 2., -10.),
+        Tuple::point(0., 1., 0.),
+        Tuple::vector(0., 1., 0.),
+    ));
 
     let canvas = camera.render(world);
 

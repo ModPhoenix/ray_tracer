@@ -224,7 +224,7 @@ mod tests {
 
         let c = w.clone().color_at(&r);
 
-        assert_eq!(c, inner.clone().get_material().clone().get_color());
+        assert_eq!(c, inner.clone().get_material().get_color());
     }
 
     #[test]
