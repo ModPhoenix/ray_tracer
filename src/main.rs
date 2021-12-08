@@ -6,6 +6,7 @@ use ray_tracer::camera::Camera;
 use ray_tracer::light::Light;
 use ray_tracer::material::Material;
 use ray_tracer::matrix::Matrix;
+use ray_tracer::patterns::gradient::Gradient;
 use ray_tracer::patterns::stripe::Stripe;
 use ray_tracer::patterns::Pattern;
 use ray_tracer::shapes::{plane::Plane, sphere::Sphere, Shape};
@@ -31,13 +32,8 @@ fn main() -> std::io::Result<()> {
                 .set_diffuse(0.9)
                 .set_specular(0.1)
                 .set_pattern(
-                    Stripe::new(Color::new_white(), Color::new(0., 0.8, 0.))
-                        .set_transform(
-                            Matrix::identity()
-                                .rotation_y(PI / 2.)
-                                .rotation_x(PI / 2.)
-                                .scaling(0.1, 0.1, 0.1),
-                        )
+                    Gradient::new(Color::new(1., 1., 0.), Color::new(0., 1., 1.))
+                        .set_transform(Matrix::identity().rotation_y(PI / 2.).rotation_x(PI / 2.))
                         .into(),
                 ),
         )

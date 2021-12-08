@@ -94,7 +94,7 @@ impl Matrix<4> {
 
     pub fn inverse(&self) -> Self {
         if !self.is_invertible() {
-            panic!()
+            panic!("matrix is not invertible");
         }
 
         let mut result = Self::new();

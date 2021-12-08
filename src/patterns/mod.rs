@@ -1,3 +1,4 @@
+pub mod gradient;
 pub mod stripe;
 
 use crate::{
@@ -7,7 +8,7 @@ use crate::{
     tuple::Tuple,
 };
 
-use self::stripe::Stripe;
+use self::{gradient::Gradient, stripe::Stripe};
 
 pub trait Pattern {
     fn get_transform(&self) -> Matrix<4>;
@@ -25,24 +26,28 @@ pub trait Pattern {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Patterns {
     Stripe(Stripe),
+    Gradient(Gradient),
 }
 
 impl Pattern for Patterns {
     fn get_transform(&self) -> Matrix<4> {
         match self {
             Patterns::Stripe(sphere) => sphere.get_transform(),
+            Patterns::Gradient(gradient) => gradient.get_transform(),
         }
     }
 
     fn set_transform(&mut self, transform: Matrix<4>) -> Self {
         match self {
             Patterns::Stripe(sphere) => sphere.set_transform(transform).into(),
+            Patterns::Gradient(gradient) => gradient.set_transform(transform).into(),
         }
     }
 
     fn pattern_at(&self, point: Tuple) -> Color {
         match self {
             Patterns::Stripe(sphere) => sphere.pattern_at(point),
+            Patterns::Gradient(gradient) => gradient.pattern_at(point),
         }
     }
 }
@@ -50,5 +55,11 @@ impl Pattern for Patterns {
 impl From<Stripe> for Patterns {
     fn from(sphere: Stripe) -> Self {
         Patterns::Stripe(sphere)
+    }
+}
+
+impl From<Gradient> for Patterns {
+    fn from(gradient: Gradient) -> Self {
+        Patterns::Gradient(gradient)
     }
 }
