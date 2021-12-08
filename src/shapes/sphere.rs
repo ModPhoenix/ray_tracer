@@ -1,6 +1,6 @@
-use crate::{
-    intersections::Intersection, material::Material, matrix::Matrix, shape::Shape, tuple::Tuple,
-};
+use crate::{intersections::Intersection, material::Material, matrix::Matrix, tuple::Tuple};
+
+use super::Shape;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Sphere {
@@ -74,7 +74,11 @@ mod tests {
     use std::f64::consts::PI;
 
     use crate::{
-        material::Material, matrix::Matrix, ray::Ray, shape::Shape, sphere::Sphere, tuple::Tuple,
+        material::Material,
+        matrix::Matrix,
+        ray::Ray,
+        shapes::{sphere::Sphere, Shape},
+        tuple::Tuple,
     };
 
     #[test]

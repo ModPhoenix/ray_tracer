@@ -2,7 +2,7 @@ use crate::{
     color::Color,
     light::Light,
     patterns::{Pattern, Patterns},
-    shape::Shapes,
+    shapes::Shapes,
     tuple::Tuple,
 };
 
@@ -138,8 +138,8 @@ impl Default for Material {
 #[cfg(test)]
 mod tests {
     use crate::{
-        color::Color, light::Light, material::Material, patterns::stripe::Stripe, sphere::Sphere,
-        tuple::Tuple,
+        color::Color, light::Light, material::Material, patterns::stripe::Stripe,
+        shapes::sphere::Sphere, tuple::Tuple,
     };
 
     #[test]

@@ -1,7 +1,9 @@
 use crate::{
     constants::EPSILON, intersections::Intersection, material::Material, matrix::Matrix,
-    shape::Shape, tuple::Tuple,
+    tuple::Tuple,
 };
+
+use super::Shape;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Plane {
@@ -65,7 +67,11 @@ impl Shape for Plane {
 #[cfg(test)]
 mod tests {
 
-    use crate::{plane::Plane, ray::Ray, shape::Shape, tuple::Tuple};
+    use crate::{
+        ray::Ray,
+        shapes::{plane::Plane, Shape},
+        tuple::Tuple,
+    };
 
     #[test]
     fn the_normal_of_a_plane_is_constant_everywhere() {

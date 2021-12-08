@@ -1,7 +1,11 @@
+pub mod plane;
+pub mod sphere;
+
 use crate::{
-    intersections::Intersection, material::Material, matrix::Matrix, plane::Plane, ray::Ray,
-    sphere::Sphere, tuple::Tuple,
+    intersections::Intersection, material::Material, matrix::Matrix, ray::Ray, tuple::Tuple,
 };
+
+use self::{plane::Plane, sphere::Sphere};
 
 pub trait Shape {
     // materials
@@ -33,7 +37,6 @@ pub trait Shape {
     }
 }
 
-// TODO: rename to Object
 #[derive(Debug, Clone, PartialEq)]
 pub enum Shapes {
     Sphere(Sphere),

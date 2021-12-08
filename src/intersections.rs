@@ -3,7 +3,7 @@ use std::ops::Index;
 use crate::{
     constants::EPSILON,
     ray::Ray,
-    shape::{Shape, Shapes},
+    shapes::{Shape, Shapes},
     tuple::Tuple,
 };
 
@@ -117,8 +117,12 @@ impl Index<usize> for Intersections {
 #[cfg(test)]
 mod tests {
     use crate::{
-        constants::EPSILON, intersections::Intersections, matrix::Matrix, ray::Ray, shape::Shape,
-        sphere::Sphere, tuple::Tuple,
+        constants::EPSILON,
+        intersections::Intersections,
+        matrix::Matrix,
+        ray::Ray,
+        shapes::{sphere::Sphere, Shape},
+        tuple::Tuple,
     };
 
     #[test]

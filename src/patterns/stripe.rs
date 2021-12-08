@@ -42,7 +42,10 @@ impl Pattern for Stripe {
 mod tests {
 
     use crate::{
-        color::Color, matrix::Matrix, patterns::stripe::Stripe, shape::Shape, sphere::Sphere,
+        color::Color,
+        matrix::Matrix,
+        patterns::stripe::Stripe,
+        shapes::{sphere::Sphere, Shape},
         tuple::Tuple,
     };
 

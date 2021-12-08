@@ -8,9 +8,7 @@ use ray_tracer::material::Material;
 use ray_tracer::matrix::Matrix;
 use ray_tracer::patterns::stripe::Stripe;
 use ray_tracer::patterns::Pattern;
-use ray_tracer::plane::Plane;
-use ray_tracer::shape::Shape;
-use ray_tracer::sphere::Sphere;
+use ray_tracer::shapes::{plane::Plane, sphere::Sphere, Shape};
 use ray_tracer::world::World;
 use ray_tracer::{color::Color, tuple::Tuple};
 

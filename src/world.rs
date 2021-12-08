@@ -1,8 +1,8 @@
 use crate::color::Color;
 use crate::intersections::{ComputedIntersection, Intersections};
 use crate::ray::Ray;
-use crate::shape::{Shape, Shapes};
 
+use crate::shapes::{Shape, Shapes};
 use crate::tuple::Tuple;
 
 use crate::light::Light;
@@ -93,8 +93,14 @@ impl Default for World {
 mod tests {
 
     use crate::{
-        color::Color, intersections::Intersection, light::Light, material::Material,
-        matrix::Matrix, ray::Ray, shape::Shape, sphere::Sphere, tuple::Tuple,
+        color::Color,
+        intersections::Intersection,
+        light::Light,
+        material::Material,
+        matrix::Matrix,
+        ray::Ray,
+        shapes::{sphere::Sphere, Shape},
+        tuple::Tuple,
     };
 
     use super::World;

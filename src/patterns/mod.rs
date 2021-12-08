@@ -1,13 +1,13 @@
+pub mod stripe;
+
 use crate::{
     color::Color,
     matrix::Matrix,
-    shape::{Shape, Shapes},
+    shapes::{Shape, Shapes},
     tuple::Tuple,
 };
 
 use self::stripe::Stripe;
-
-pub mod stripe;
 
 pub trait Pattern {
     fn get_transform(&self) -> Matrix<4>;
