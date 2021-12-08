@@ -1,3 +1,4 @@
+pub mod checkers;
 pub mod gradient;
 pub mod ring;
 pub mod stripe;
@@ -9,7 +10,7 @@ use crate::{
     tuple::Tuple,
 };
 
-use self::{gradient::Gradient, ring::Ring, stripe::Stripe};
+use self::{checkers::Checkers, gradient::Gradient, ring::Ring, stripe::Stripe};
 
 pub trait Pattern {
     fn get_transform(&self) -> Matrix<4>;
@@ -29,6 +30,7 @@ pub enum Patterns {
     Stripe(Stripe),
     Gradient(Gradient),
     Ring(Ring),
+    Checkers(Checkers),
 }
 
 impl Pattern for Patterns {
@@ -37,6 +39,7 @@ impl Pattern for Patterns {
             Patterns::Stripe(sphere) => sphere.get_transform(),
             Patterns::Gradient(gradient) => gradient.get_transform(),
             Patterns::Ring(ring) => ring.get_transform(),
+            Patterns::Checkers(checkers) => checkers.get_transform(),
         }
     }
 
@@ -45,6 +48,7 @@ impl Pattern for Patterns {
             Patterns::Stripe(sphere) => sphere.set_transform(transform).into(),
             Patterns::Gradient(gradient) => gradient.set_transform(transform).into(),
             Patterns::Ring(ring) => ring.set_transform(transform).into(),
+            Patterns::Checkers(checkers) => checkers.set_transform(transform).into(),
         }
     }
 
@@ -53,6 +57,7 @@ impl Pattern for Patterns {
             Patterns::Stripe(sphere) => sphere.pattern_at(point),
             Patterns::Gradient(gradient) => gradient.pattern_at(point),
             Patterns::Ring(ring) => ring.pattern_at(point),
+            Patterns::Checkers(checkers) => checkers.pattern_at(point),
         }
     }
 }
@@ -72,5 +77,11 @@ impl From<Gradient> for Patterns {
 impl From<Ring> for Patterns {
     fn from(ring: Ring) -> Self {
         Patterns::Ring(ring)
+    }
+}
+
+impl From<Checkers> for Patterns {
+    fn from(checkers: Checkers) -> Self {
+        Patterns::Checkers(checkers)
     }
 }

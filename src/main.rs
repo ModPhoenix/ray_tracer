@@ -6,8 +6,8 @@ use ray_tracer::camera::Camera;
 use ray_tracer::light::Light;
 use ray_tracer::material::Material;
 use ray_tracer::matrix::Matrix;
+use ray_tracer::patterns::checkers::Checkers;
 use ray_tracer::patterns::gradient::Gradient;
-use ray_tracer::patterns::ring::Ring;
 use ray_tracer::patterns::stripe::Stripe;
 use ray_tracer::patterns::Pattern;
 use ray_tracer::shapes::{plane::Plane, sphere::Sphere, Shape};
@@ -18,7 +18,7 @@ fn main() -> std::io::Result<()> {
     let walls_material = Material::default()
         .set_color(Color::new(1., 0.9, 0.9))
         .set_specular(0.)
-        .set_pattern(Ring::new(Color::new_white(), Color::new(1., 0., 0.)).into());
+        .set_pattern(Checkers::new(Color::new_white(), Color::new(1., 0., 0.)).into());
 
     let floor = Plane::default().set_material(walls_material);
 
@@ -28,11 +28,7 @@ fn main() -> std::io::Result<()> {
                 .set_color(Color::new(0.1, 1., 0.5))
                 .set_diffuse(0.9)
                 .set_specular(0.1)
-                .set_pattern(
-                    Gradient::new(Color::new(1., 1., 0.), Color::new(0., 1., 1.))
-                        .set_transform(Matrix::identity().rotation_y(PI / 2.).rotation_x(PI / 2.))
-                        .into(),
-                ),
+                .set_pattern(Checkers::new(Color::new(0., 1., 0.), Color::new(1., 0., 1.)).into()),
         )
         .set_transform(Matrix::identity().translation(-0.5, 1., 1.5));
 
@@ -59,7 +55,12 @@ fn main() -> std::io::Result<()> {
             Material::default()
                 .set_color(Color::new(1., 0., 1.))
                 .set_diffuse(0.7)
-                .set_specular(0.3),
+                .set_specular(0.3)
+                .set_pattern(
+                    Gradient::new(Color::new(1., 1., 0.), Color::new(0., 1., 0.))
+                        .set_transform(Matrix::identity().rotation_y(PI / 2.).rotation_x(PI / 2.))
+                        .into(),
+                ),
         )
         .set_transform(
             Matrix::identity()
@@ -78,7 +79,7 @@ fn main() -> std::io::Result<()> {
     // 4K - 4096 × 3112
     // 8K - 7680 × 4320
 
-    let camera = Camera::new(1500, 1000, PI / 3.).set_transform(Matrix::identity().view_transform(
+    let camera = Camera::new(4096, 3112, PI / 3.).set_transform(Matrix::identity().view_transform(
         Tuple::point(0., 2., -10.),
         Tuple::point(0., 1., 0.),
         Tuple::vector(0., 1., 0.),
