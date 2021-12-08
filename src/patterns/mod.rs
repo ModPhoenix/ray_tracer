@@ -1,4 +1,5 @@
 pub mod gradient;
+pub mod ring;
 pub mod stripe;
 
 use crate::{
@@ -8,7 +9,7 @@ use crate::{
     tuple::Tuple,
 };
 
-use self::{gradient::Gradient, stripe::Stripe};
+use self::{gradient::Gradient, ring::Ring, stripe::Stripe};
 
 pub trait Pattern {
     fn get_transform(&self) -> Matrix<4>;
@@ -27,6 +28,7 @@ pub trait Pattern {
 pub enum Patterns {
     Stripe(Stripe),
     Gradient(Gradient),
+    Ring(Ring),
 }
 
 impl Pattern for Patterns {
@@ -34,6 +36,7 @@ impl Pattern for Patterns {
         match self {
             Patterns::Stripe(sphere) => sphere.get_transform(),
             Patterns::Gradient(gradient) => gradient.get_transform(),
+            Patterns::Ring(ring) => ring.get_transform(),
         }
     }
 
@@ -41,6 +44,7 @@ impl Pattern for Patterns {
         match self {
             Patterns::Stripe(sphere) => sphere.set_transform(transform).into(),
             Patterns::Gradient(gradient) => gradient.set_transform(transform).into(),
+            Patterns::Ring(ring) => ring.set_transform(transform).into(),
         }
     }
 
@@ -48,6 +52,7 @@ impl Pattern for Patterns {
         match self {
             Patterns::Stripe(sphere) => sphere.pattern_at(point),
             Patterns::Gradient(gradient) => gradient.pattern_at(point),
+            Patterns::Ring(ring) => ring.pattern_at(point),
         }
     }
 }
@@ -61,5 +66,11 @@ impl From<Stripe> for Patterns {
 impl From<Gradient> for Patterns {
     fn from(gradient: Gradient) -> Self {
         Patterns::Gradient(gradient)
+    }
+}
+
+impl From<Ring> for Patterns {
+    fn from(ring: Ring) -> Self {
+        Patterns::Ring(ring)
     }
 }

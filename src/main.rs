@@ -7,6 +7,7 @@ use ray_tracer::light::Light;
 use ray_tracer::material::Material;
 use ray_tracer::matrix::Matrix;
 use ray_tracer::patterns::gradient::Gradient;
+use ray_tracer::patterns::ring::Ring;
 use ray_tracer::patterns::stripe::Stripe;
 use ray_tracer::patterns::Pattern;
 use ray_tracer::shapes::{plane::Plane, sphere::Sphere, Shape};
@@ -17,11 +18,7 @@ fn main() -> std::io::Result<()> {
     let walls_material = Material::default()
         .set_color(Color::new(1., 0.9, 0.9))
         .set_specular(0.)
-        .set_pattern(
-            Stripe::new(Color::new_white(), Color::new(1., 0., 0.))
-                .set_transform(Matrix::identity().scaling(0.5, 0.1, 0.1))
-                .into(),
-        );
+        .set_pattern(Ring::new(Color::new_white(), Color::new(1., 0., 0.)).into());
 
     let floor = Plane::default().set_material(walls_material);
 
