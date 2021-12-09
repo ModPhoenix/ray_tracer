@@ -15,6 +15,14 @@ impl Sphere {
             material,
         }
     }
+
+    pub fn new_glass() -> Self {
+        Self::default().set_material(
+            Material::default()
+                .set_transparency(1.)
+                .set_refractive_index(1.5),
+        )
+    }
 }
 
 impl Default for Sphere {
@@ -259,5 +267,14 @@ mod tests {
         s.material = m.clone();
 
         assert_eq!(s.material, m);
+    }
+
+    #[test]
+    fn a_helper_for_producing_a_sphere_with_a_glassy_material() {
+        let s = Sphere::new_glass();
+
+        assert_eq!(s.transform, Matrix::identity());
+        assert_eq!(s.material.get_transparency(), 1.);
+        assert_eq!(s.material.get_refractive_index(), 1.5);
     }
 }

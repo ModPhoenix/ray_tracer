@@ -14,6 +14,8 @@ pub struct Material {
     specular: f64,
     shininess: f64,
     reflective: f64,
+    transparency: f64,
+    refractive_index: f64,
     pattern: Option<Patterns>,
 }
 
@@ -25,6 +27,8 @@ impl Material {
         specular: f64,
         shininess: f64,
         reflective: f64,
+        transparency: f64,
+        refractive_index: f64,
         pattern: Option<Patterns>,
     ) -> Self {
         Self {
@@ -34,6 +38,8 @@ impl Material {
             specular,
             shininess,
             reflective,
+            transparency,
+            refractive_index,
             pattern,
         }
     }
@@ -78,6 +84,24 @@ impl Material {
 
     pub fn set_pattern(mut self, pattern: Patterns) -> Self {
         self.pattern = Some(pattern);
+        self
+    }
+
+    pub fn get_transparency(&self) -> f64 {
+        self.transparency
+    }
+
+    pub fn set_transparency(mut self, transparency: f64) -> Self {
+        self.transparency = transparency;
+        self
+    }
+
+    pub fn get_refractive_index(&self) -> f64 {
+        self.refractive_index
+    }
+
+    pub fn set_refractive_index(mut self, refractive_index: f64) -> Self {
+        self.refractive_index = refractive_index;
         self
     }
 
@@ -143,6 +167,8 @@ impl Default for Material {
             specular: 0.9,
             shininess: 200.0,
             reflective: 0.,
+            transparency: 0.,
+            refractive_index: 1.,
             pattern: None,
         }
     }
@@ -171,6 +197,14 @@ mod tests {
         let m = Material::default();
 
         assert_eq!(m.reflective, 0.);
+    }
+
+    #[test]
+    fn transparency_and_refractive_index_for_the_default_material() {
+        let m = Material::default();
+
+        assert_eq!(m.transparency, 0.);
+        assert_eq!(m.refractive_index, 1.);
     }
 
     #[test]
