@@ -13,6 +13,7 @@ pub struct Material {
     diffuse: f64,
     specular: f64,
     shininess: f64,
+    reflective: f64,
     pattern: Option<Patterns>,
 }
 
@@ -23,6 +24,7 @@ impl Material {
         diffuse: f64,
         specular: f64,
         shininess: f64,
+        reflective: f64,
         pattern: Option<Patterns>,
     ) -> Self {
         Self {
@@ -31,6 +33,7 @@ impl Material {
             diffuse,
             specular,
             shininess,
+            reflective,
             pattern,
         }
     }
@@ -61,6 +64,15 @@ impl Material {
 
     pub fn set_shininess(mut self, shininess: f64) -> Self {
         self.shininess = shininess;
+        self
+    }
+
+    pub fn get_reflective(&self) -> f64 {
+        self.reflective
+    }
+
+    pub fn set_reflective(mut self, reflective: f64) -> Self {
+        self.reflective = reflective;
         self
     }
 
@@ -130,6 +142,7 @@ impl Default for Material {
             diffuse: 0.9,
             specular: 0.9,
             shininess: 200.0,
+            reflective: 0.,
             pattern: None,
         }
     }
@@ -151,6 +164,13 @@ mod tests {
         assert_eq!(m.diffuse, 0.9);
         assert_eq!(m.specular, 0.9);
         assert_eq!(m.shininess, 200.);
+    }
+
+    #[test]
+    fn reflectivity_for_the_default_material() {
+        let m = Material::default();
+
+        assert_eq!(m.reflective, 0.);
     }
 
     #[test]

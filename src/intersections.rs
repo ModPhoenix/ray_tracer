@@ -15,6 +15,7 @@ pub struct ComputedIntersection {
     pub over_point: Tuple,
     pub normalv: Tuple,
     pub eyev: Tuple,
+    pub reflectv: Tuple,
     pub inside: bool,
 }
 
@@ -26,6 +27,7 @@ impl ComputedIntersection {
         over_point: Tuple,
         normalv: Tuple,
         eyev: Tuple,
+        reflectv: Tuple,
         inside: bool,
     ) -> Self {
         Self {
@@ -35,6 +37,7 @@ impl ComputedIntersection {
             over_point,
             normalv,
             eyev,
+            reflectv,
             inside,
         }
     }
@@ -65,6 +68,7 @@ impl Intersection {
         }
 
         let over_point = point + normalv * EPSILON;
+        let reflectv = ray.direction.reflect(normalv);
 
         ComputedIntersection::new(
             self.t,
@@ -73,6 +77,7 @@ impl Intersection {
             over_point,
             normalv,
             eyev,
+            reflectv,
             inside,
         )
     }
@@ -121,7 +126,7 @@ mod tests {
         intersections::Intersections,
         matrix::Matrix,
         ray::Ray,
-        shapes::{sphere::Sphere, Shape},
+        shapes::{plane::Plane, sphere::Sphere, Shape},
         tuple::Tuple,
     };
 
@@ -147,6 +152,23 @@ mod tests {
         assert_eq!(comps.point, Tuple::point(0., 0., -1.));
         assert_eq!(comps.eyev, Tuple::vector(0., 0., -1.));
         assert_eq!(comps.normalv, Tuple::vector(0., 0., -1.));
+    }
+
+    #[test]
+    fn precomputing_the_reflection_vector() {
+        let shape = Plane::default();
+        let r = Ray::new(
+            Tuple::point(0., 1., -1.),
+            Tuple::vector(0., -2.0_f64.sqrt() / 2., 2.0_f64.sqrt() / 2.),
+        );
+
+        let i = shape.intersection(2.0_f64.sqrt());
+        let comps = i.prepare_computations(&r);
+
+        assert_eq!(
+            comps.reflectv,
+            Tuple::vector(0., 2.0_f64.sqrt() / 2., 2.0_f64.sqrt() / 2.)
+        );
     }
 
     #[test]

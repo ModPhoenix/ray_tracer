@@ -18,7 +18,8 @@ fn main() -> std::io::Result<()> {
     let walls_material = Material::default()
         .set_color(Color::new(1., 0.9, 0.9))
         .set_specular(0.)
-        .set_pattern(Checkers::new(Color::new_white(), Color::new(1., 0., 0.)).into());
+        .set_reflective(0.2)
+        .set_pattern(Checkers::new(Color::new(0.2, 0.2, 0.2), Color::new(0.5, 0.5, 0.5)).into());
 
     let floor = Plane::default().set_material(walls_material);
 
@@ -79,7 +80,7 @@ fn main() -> std::io::Result<()> {
     // 4K - 4096 × 3112
     // 8K - 7680 × 4320
 
-    let camera = Camera::new(4096, 3112, PI / 3.).set_transform(Matrix::identity().view_transform(
+    let camera = Camera::new(1500, 1000, PI / 3.).set_transform(Matrix::identity().view_transform(
         Tuple::point(0., 2., -10.),
         Tuple::point(0., 1., 0.),
         Tuple::vector(0., 1., 0.),
