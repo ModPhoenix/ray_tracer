@@ -13,6 +13,7 @@ pub struct ComputedIntersection {
     pub object: Shapes,
     pub point: Tuple,
     pub over_point: Tuple,
+    pub under_point: Tuple,
     pub normalv: Tuple,
     pub eyev: Tuple,
     pub reflectv: Tuple,
@@ -27,6 +28,7 @@ impl ComputedIntersection {
         object: Shapes,
         point: Tuple,
         over_point: Tuple,
+        under_point: Tuple,
         normalv: Tuple,
         eyev: Tuple,
         reflectv: Tuple,
@@ -39,6 +41,7 @@ impl ComputedIntersection {
             object,
             point,
             over_point,
+            under_point,
             normalv,
             eyev,
             reflectv,
@@ -76,6 +79,7 @@ impl Intersection {
         }
 
         let over_point = point + normalv * EPSILON;
+        let under_point = point - normalv * EPSILON;
         let reflectv = ray.direction.reflect(normalv);
 
         let mut containers: Vec<Shapes> = vec![];
@@ -122,6 +126,7 @@ impl Intersection {
             self.object.clone(),
             point,
             over_point,
+            under_point,
             normalv,
             eyev,
             reflectv,
@@ -321,6 +326,19 @@ mod tests {
 
         assert!(comps.over_point.z < -EPSILON / 2.);
         assert!(comps.point.z > comps.over_point.z);
+    }
+
+    #[test]
+    fn the_under_point_is_offset_below_the_surface() {
+        let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vector(0., 0., 1.));
+        let shape = Sphere::new_glass().set_transform(Matrix::identity().translation(0., 0., 1.));
+
+        let i = shape.intersection(5.);
+        let xs = Intersections::new(vec![i.clone()]);
+        let comps = i.prepare_computations(&r, xs);
+
+        assert!(comps.under_point.z > EPSILON / 2.);
+        assert!(comps.point.z < comps.under_point.z);
     }
 
     #[test]
