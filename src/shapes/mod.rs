@@ -4,10 +4,12 @@ pub mod sphere;
 use crate::{
     intersections::Intersection, material::Material, matrix::Matrix, ray::Ray, tuple::Tuple,
 };
+use uuid::Uuid;
 
 use self::{plane::Plane, sphere::Sphere};
 
 pub trait Shape {
+    fn id(&self) -> Uuid;
     // materials
     fn get_material(&self) -> Material;
     fn set_material(&mut self, material: Material) -> Self;
@@ -53,6 +55,13 @@ impl Shapes {
 }
 
 impl Shape for Shapes {
+    fn id(&self) -> Uuid {
+        match self {
+            Shapes::Sphere(sphere) => sphere.id(),
+            Shapes::Plane(plane) => plane.id(),
+        }
+    }
+
     fn get_material(&self) -> Material {
         match self {
             Shapes::Sphere(sphere) => sphere.get_material(),

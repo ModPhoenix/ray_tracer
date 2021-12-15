@@ -1,9 +1,12 @@
+use uuid::Uuid;
+
 use crate::{intersections::Intersection, material::Material, matrix::Matrix, tuple::Tuple};
 
 use super::Shape;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Sphere {
+    id: Uuid,
     pub transform: Matrix<4>,
     pub material: Material,
 }
@@ -11,6 +14,7 @@ pub struct Sphere {
 impl Sphere {
     pub fn new(transform: Matrix<4>, material: Material) -> Self {
         Self {
+            id: Uuid::new_v4(),
             transform,
             material,
         }
@@ -32,6 +36,10 @@ impl Default for Sphere {
 }
 
 impl Shape for Sphere {
+    fn id(&self) -> Uuid {
+        self.id
+    }
+
     fn get_material(&self) -> Material {
         self.material.clone()
     }
@@ -141,7 +149,7 @@ mod tests {
     fn intersect_sets_the_object_on_the_intersection() {
         let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vector(0., 0., 1.));
         let s = Sphere::default();
-        let xs = Sphere::default().intersect(&r);
+        let xs = s.intersect(&r);
 
         assert_eq!(xs.clone().unwrap().len(), 2);
         assert_eq!(xs.clone().unwrap()[0].object, s.clone().into());

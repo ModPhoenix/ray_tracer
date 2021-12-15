@@ -17,6 +17,8 @@ pub struct ComputedIntersection {
     pub eyev: Tuple,
     pub reflectv: Tuple,
     pub inside: bool,
+    pub n1: f64,
+    pub n2: f64,
 }
 
 impl ComputedIntersection {
@@ -29,6 +31,8 @@ impl ComputedIntersection {
         eyev: Tuple,
         reflectv: Tuple,
         inside: bool,
+        n1: f64,
+        n2: f64,
     ) -> Self {
         Self {
             t,
@@ -39,6 +43,8 @@ impl ComputedIntersection {
             eyev,
             reflectv,
             inside,
+            n1,
+            n2,
         }
     }
 }
@@ -54,11 +60,13 @@ impl Intersection {
         Self { t, object }
     }
 
-    pub fn prepare_computations(&self, ray: &Ray) -> ComputedIntersection {
+    pub fn prepare_computations(&self, ray: &Ray, xs: Intersections) -> ComputedIntersection {
         let point = ray.position(self.t);
         let mut normalv = self.object.normal_at(point);
         let eyev = -ray.direction;
         let inside;
+        let mut n1 = 0.;
+        let mut n2 = 0.;
 
         if Tuple::dot(&normalv, &eyev) < 0. {
             inside = true;
@@ -70,6 +78,45 @@ impl Intersection {
         let over_point = point + normalv * EPSILON;
         let reflectv = ray.direction.reflect(normalv);
 
+        let mut containers: Vec<Shapes> = vec![];
+
+        for i in xs.into_iter() {
+            if Some(&i) == Some(self) {
+                if containers.is_empty() {
+                    n1 = 1.;
+                } else {
+                    n1 = containers
+                        .last()
+                        .unwrap()
+                        .get_material()
+                        .get_refractive_index();
+                }
+            }
+
+            if containers.contains(&i.object) {
+                containers = containers
+                    .into_iter()
+                    .filter(|item| item != &i.object)
+                    .collect();
+            } else {
+                containers.push(i.object.clone())
+            }
+
+            if Some(&i) == Some(self) {
+                if containers.is_empty() {
+                    n2 = 1.;
+                } else {
+                    n2 = containers
+                        .last()
+                        .unwrap()
+                        .get_material()
+                        .get_refractive_index();
+                }
+
+                break;
+            }
+        }
+
         ComputedIntersection::new(
             self.t,
             self.object.clone(),
@@ -79,11 +126,13 @@ impl Intersection {
             eyev,
             reflectv,
             inside,
+            n1,
+            n2,
         )
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Intersections {
     data: Vec<Intersection>,
 }
@@ -101,6 +150,10 @@ impl Intersections {
         self.data.len()
     }
 
+    pub fn into_iter(self) -> std::vec::IntoIter<Intersection> {
+        self.data.into_iter()
+    }
+
     pub fn hit(self) -> Option<Intersection> {
         for intersection in self.data.into_iter() {
             if intersection.t > 0.0 {
@@ -109,6 +162,12 @@ impl Intersections {
         }
 
         None
+    }
+}
+
+impl Default for Intersections {
+    fn default() -> Self {
+        Self::new(vec![])
     }
 }
 
@@ -124,6 +183,7 @@ mod tests {
     use crate::{
         constants::EPSILON,
         intersections::Intersections,
+        material::Material,
         matrix::Matrix,
         ray::Ray,
         shapes::{plane::Plane, sphere::Sphere, Shape},
@@ -145,7 +205,7 @@ mod tests {
         let shape = Sphere::default();
         let i = shape.intersection(4.);
 
-        let comps = i.prepare_computations(&r);
+        let comps = i.prepare_computations(&r, Intersections::default());
 
         assert_eq!(comps.t, i.t);
         assert_eq!(comps.object, i.object);
@@ -163,7 +223,7 @@ mod tests {
         );
 
         let i = shape.intersection(2.0_f64.sqrt());
-        let comps = i.prepare_computations(&r);
+        let comps = i.prepare_computations(&r, Intersections::default());
 
         assert_eq!(
             comps.reflectv,
@@ -177,7 +237,7 @@ mod tests {
         let shape = Sphere::default();
         let i = shape.intersection(4.);
 
-        let comps = i.prepare_computations(&r);
+        let comps = i.prepare_computations(&r, Intersections::default());
 
         assert_eq!(comps.inside, false);
     }
@@ -188,7 +248,7 @@ mod tests {
         let shape = Sphere::default();
         let i = shape.intersection(1.);
 
-        let comps = i.prepare_computations(&r);
+        let comps = i.prepare_computations(&r, Intersections::default());
 
         assert_eq!(comps.point, Tuple::point(0., 0., 1.));
         assert_eq!(comps.eyev, Tuple::vector(0., 0., -1.));
@@ -257,9 +317,48 @@ mod tests {
         let shape = Sphere::default().set_transform(Matrix::identity().translation(0., 0., 1.));
 
         let i = shape.intersection(5.);
-        let comps = i.prepare_computations(&r);
+        let comps = i.prepare_computations(&r, Intersections::default());
 
         assert!(comps.over_point.z < -EPSILON / 2.);
         assert!(comps.point.z > comps.over_point.z);
+    }
+
+    #[test]
+    fn finding_n1_and_n2_at_various_intersections() {
+        let a = Sphere::new_glass()
+            .set_transform(Matrix::identity().scaling(2., 2., 2.))
+            .set_material(Material::default().set_refractive_index(1.5));
+        let b = Sphere::new_glass()
+            .set_transform(Matrix::identity().translation(0., 0., -0.25))
+            .set_material(Material::default().set_refractive_index(2.));
+        let c = Sphere::new_glass()
+            .set_transform(Matrix::identity().translation(0., 0., 0.25))
+            .set_material(Material::default().set_refractive_index(2.5));
+
+        let r = Ray::new(Tuple::point(0., 0., -4.), Tuple::vector(0., 0., 1.));
+        let xs = Intersections::new(vec![
+            a.intersection(2.),
+            b.intersection(2.75),
+            c.intersection(3.25),
+            b.intersection(4.75),
+            c.intersection(5.25),
+            a.intersection(6.),
+        ]);
+
+        let examples = vec![
+            (1.0, 1.5),
+            (1.5, 2.0),
+            (2.0, 2.5),
+            (2.5, 2.5),
+            (2.5, 1.5),
+            (1.5, 1.0),
+        ];
+
+        for (index, (n1, n2)) in examples.into_iter().enumerate() {
+            let comps = xs[index].prepare_computations(&r, xs.clone());
+
+            assert_eq!(comps.n1, n1);
+            assert_eq!(comps.n2, n2);
+        }
     }
 }

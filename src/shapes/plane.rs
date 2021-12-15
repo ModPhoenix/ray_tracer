@@ -1,3 +1,5 @@
+use uuid::Uuid;
+
 use crate::{
     constants::EPSILON, intersections::Intersection, material::Material, matrix::Matrix,
     tuple::Tuple,
@@ -7,6 +9,7 @@ use super::Shape;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Plane {
+    id: Uuid,
     pub transform: Matrix<4>,
     pub material: Material,
 }
@@ -14,6 +17,7 @@ pub struct Plane {
 impl Plane {
     pub fn new(transform: Matrix<4>, material: Material) -> Self {
         Self {
+            id: Uuid::new_v4(),
             transform,
             material,
         }
@@ -27,6 +31,10 @@ impl Default for Plane {
 }
 
 impl Shape for Plane {
+    fn id(&self) -> Uuid {
+        self.id
+    }
+
     fn get_material(&self) -> Material {
         self.material.clone()
     }
