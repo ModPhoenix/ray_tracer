@@ -1,8 +1,3 @@
-pub mod checkers;
-pub mod gradient;
-pub mod ring;
-pub mod stripe;
-
 use crate::{
     color::Color,
     matrix::Matrix,
@@ -10,7 +5,15 @@ use crate::{
     tuple::Tuple,
 };
 
-use self::{checkers::Checkers, gradient::Gradient, ring::Ring, stripe::Stripe};
+pub mod checkers;
+pub mod gradient;
+pub mod ring;
+pub mod stripe;
+pub mod test_pattern;
+
+use self::{
+    checkers::Checkers, gradient::Gradient, ring::Ring, stripe::Stripe, test_pattern::TestPattern,
+};
 
 pub trait Pattern {
     fn get_transform(&self) -> Matrix<4>;
@@ -31,6 +34,7 @@ pub enum Patterns {
     Gradient(Gradient),
     Ring(Ring),
     Checkers(Checkers),
+    TestPattern(TestPattern),
 }
 
 impl Pattern for Patterns {
@@ -40,6 +44,7 @@ impl Pattern for Patterns {
             Patterns::Gradient(gradient) => gradient.get_transform(),
             Patterns::Ring(ring) => ring.get_transform(),
             Patterns::Checkers(checkers) => checkers.get_transform(),
+            Patterns::TestPattern(test_pattern) => test_pattern.get_transform(),
         }
     }
 
@@ -49,6 +54,7 @@ impl Pattern for Patterns {
             Patterns::Gradient(gradient) => gradient.set_transform(transform).into(),
             Patterns::Ring(ring) => ring.set_transform(transform).into(),
             Patterns::Checkers(checkers) => checkers.set_transform(transform).into(),
+            Patterns::TestPattern(test_pattern) => test_pattern.set_transform(transform).into(),
         }
     }
 
@@ -58,6 +64,7 @@ impl Pattern for Patterns {
             Patterns::Gradient(gradient) => gradient.pattern_at(point),
             Patterns::Ring(ring) => ring.pattern_at(point),
             Patterns::Checkers(checkers) => checkers.pattern_at(point),
+            Patterns::TestPattern(test_pattern) => test_pattern.pattern_at(point),
         }
     }
 }
@@ -83,5 +90,11 @@ impl From<Ring> for Patterns {
 impl From<Checkers> for Patterns {
     fn from(checkers: Checkers) -> Self {
         Patterns::Checkers(checkers)
+    }
+}
+
+impl From<TestPattern> for Patterns {
+    fn from(test_pattern: TestPattern) -> Self {
+        Patterns::TestPattern(test_pattern)
     }
 }

@@ -50,6 +50,27 @@ impl ComputedIntersection {
             n2,
         }
     }
+
+    pub fn schlick(&self) -> f64 {
+        let mut cos = Tuple::dot(&self.eyev, &self.normalv);
+
+        if self.n1 > self.n2 {
+            let n = self.n1 / self.n2;
+            let sin2_t = n.powf(2.) * (1. - cos.powf(2.));
+
+            if sin2_t > 1.0 {
+                return 1.0;
+            }
+
+            let cos_t = (1.0 - sin2_t).sqrt();
+
+            cos = cos_t;
+        }
+
+        let r0 = ((self.n1 - self.n2) / (self.n1 + self.n2)).powf(2.);
+
+        r0 + (1. - r0) * (1. - cos).powf(5.)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -68,8 +89,8 @@ impl Intersection {
         let mut normalv = self.object.normal_at(point);
         let eyev = -ray.direction;
         let inside;
-        let mut n1 = 0.;
-        let mut n2 = 0.;
+        let mut n1 = f64::NAN;
+        let mut n2 = f64::NAN;
 
         if Tuple::dot(&normalv, &eyev) < 0. {
             inside = true;
@@ -159,10 +180,10 @@ impl Intersections {
         self.data.into_iter()
     }
 
-    pub fn hit(self) -> Option<Intersection> {
-        for intersection in self.data.into_iter() {
+    pub fn hit(&self) -> Option<Intersection> {
+        for intersection in self.data.iter() {
             if intersection.t > 0.0 {
-                return Some(intersection);
+                return Some(intersection.clone());
             }
         }
 
@@ -193,6 +214,7 @@ mod tests {
         ray::Ray,
         shapes::{plane::Plane, sphere::Sphere, Shape},
         tuple::Tuple,
+        utils::fuzzy_equal::fuzzy_equal,
     };
 
     #[test]
@@ -378,5 +400,47 @@ mod tests {
             assert_eq!(comps.n1, n1);
             assert_eq!(comps.n2, n2);
         }
+    }
+
+    #[test]
+    fn the_schlick_approximation_under_total_internal_reflection() {
+        let shape = Sphere::new_glass();
+        let r = Ray::new(
+            Tuple::point(0., 0., 2.0_f64.sqrt() / 2.),
+            Tuple::vector(0., 1., 0.),
+        );
+
+        let xs = Intersections::new(vec![
+            shape.intersection(-2.0_f64.sqrt() / 2.),
+            shape.intersection(2.0_f64.sqrt() / 2.),
+        ]);
+        let comps = xs[1].prepare_computations(&r, xs.clone());
+        let reflectance = comps.schlick();
+
+        assert_eq!(reflectance, 1.);
+    }
+
+    #[test]
+    fn the_schlick_approximation_with_a_perpendicular_viewing_angle() {
+        let shape = Sphere::new_glass();
+        let r = Ray::new(Tuple::point(0., 0., 0.), Tuple::vector(0., 1., 0.));
+
+        let xs = Intersections::new(vec![shape.intersection(-1.), shape.intersection(1.)]);
+        let comps = xs[1].prepare_computations(&r, xs.clone());
+        let reflectance = comps.schlick();
+
+        assert!(fuzzy_equal(reflectance, 0.04));
+    }
+
+    #[test]
+    fn the_schlick_approximation_with_small_angle_and_n2_bigger_n1() {
+        let shape = Sphere::new_glass();
+        let r = Ray::new(Tuple::point(0., 0.99, -2.), Tuple::vector(0., 0., 1.));
+
+        let xs = Intersections::new(vec![shape.intersection(1.8589)]);
+        let comps = xs[0].prepare_computations(&r, xs.clone());
+        let reflectance = comps.schlick();
+
+        assert!(fuzzy_equal(reflectance, 0.48873));
     }
 }

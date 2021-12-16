@@ -8,7 +8,6 @@ use ray_tracer::material::Material;
 use ray_tracer::matrix::Matrix;
 use ray_tracer::patterns::checkers::Checkers;
 use ray_tracer::patterns::gradient::Gradient;
-use ray_tracer::patterns::stripe::Stripe;
 use ray_tracer::patterns::Pattern;
 use ray_tracer::shapes::{plane::Plane, sphere::Sphere, Shape};
 use ray_tracer::world::World;
@@ -27,29 +26,17 @@ fn main() -> std::io::Result<()> {
         .set_material(
             Material::default()
                 .set_color(Color::new(0.1, 1., 0.5))
-                .set_diffuse(0.9)
-                .set_specular(0.1)
+                .set_reflective(0.5)
+                .set_refractive_index(1.5)
                 .set_pattern(Checkers::new(Color::new(0., 1., 0.), Color::new(1., 0., 1.)).into()),
         )
         .set_transform(Matrix::identity().translation(-0.5, 1., 1.5));
 
-    let right = Sphere::default()
-        .set_material(
-            Material::default()
-                .set_color(Color::new(1., 0., 0.))
-                .set_diffuse(0.7)
-                .set_specular(0.3)
-                .set_pattern(
-                    Stripe::new(Color::new(0., 1., 1.), Color::new(1., 1., 0.))
-                        .set_transform(Matrix::identity().rotation_y(PI / 2.).rotation_x(PI / 2.))
-                        .into(),
-                ),
-        )
-        .set_transform(
-            Matrix::identity()
-                .scaling(0.5, 0.5, 0.5)
-                .translation(1.5, 0.5, -0.5),
-        );
+    let right = Sphere::new_glass().set_transform(
+        Matrix::identity()
+            .scaling(0.5, 0.5, 0.5)
+            .translation(1.5, 0.5, -0.5),
+    );
 
     let left = Sphere::default()
         .set_material(
@@ -81,7 +68,7 @@ fn main() -> std::io::Result<()> {
     // 8K - 7680 × 4320
 
     let camera = Camera::new(1500, 1000, PI / 3.).set_transform(Matrix::identity().view_transform(
-        Tuple::point(0., 2., -10.),
+        Tuple::point(0., 10., -5.),
         Tuple::point(0., 1., 0.),
         Tuple::vector(0., 1., 0.),
     ));
