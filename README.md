@@ -15,6 +15,7 @@ You can apply various transformations and material settings to the object. All o
 
 ### Examples of rendered scenes
 
+![Reflection and Refraction](progress/chapter_11_02.png)
 ![Three spheres on a plane with patterns](progress/chapter_10_03.png)
 ![Three spheres on a plane](progress/chapter_09_01.png)
 ![Three spheres on a plane from afar](progress/chapter_09_02.png)
@@ -33,7 +34,7 @@ You can apply various transformations and material settings to the object. All o
 - [x] Chapter 08: Shadows
 - [x] Chapter 09: Planes
 - [x] Chapter 10: Patterns
-- [ ] Chapter 11: Reflection and Refraction
+- [x] Chapter 11: Reflection and Refraction
 - [ ] Chapter 12: Cubes
 - [ ] Chapter 13: Cylinders
 - [ ] Chapter 14: Groups
