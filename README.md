@@ -12,6 +12,7 @@ You can apply various transformations and material settings to the object. All o
 
 - Sphere
 - Plane
+- Cube
 
 ### Examples of rendered scenes
 
@@ -35,7 +36,7 @@ You can apply various transformations and material settings to the object. All o
 - [x] Chapter 09: Planes
 - [x] Chapter 10: Patterns
 - [x] Chapter 11: Reflection and Refraction
-- [ ] Chapter 12: Cubes
+- [x] Chapter 12: Cubes
 - [ ] Chapter 13: Cylinders
 - [ ] Chapter 14: Groups
 - [ ] Chapter 15: Triangles

@@ -90,14 +90,30 @@ impl Shape for Cube {
         let tmin = tmin_arr.iter().max_by(|a, b| a.partial_cmp(b).unwrap());
         let tmax = tmax_arr.iter().min_by(|a, b| a.partial_cmp(b).unwrap());
 
-        Some(vec![
-            self.intersection(*tmin.unwrap()),
-            self.intersection(*tmax.unwrap()),
-        ])
+        if tmin > tmax {
+            None
+        } else {
+            Some(vec![
+                self.intersection(*tmin.unwrap()),
+                self.intersection(*tmax.unwrap()),
+            ])
+        }
     }
 
-    fn local_normal_at(&self, _: Tuple) -> Tuple {
-        Tuple::vector(0., 1., 0.)
+    fn local_normal_at(&self, point: Tuple) -> Tuple {
+        let maxc_arr = [point.x.abs(), point.y.abs(), point.z.abs()];
+        let maxc = maxc_arr
+            .iter()
+            .max_by(|a, b| a.partial_cmp(b).unwrap())
+            .unwrap();
+
+        if maxc == &point.x.abs() {
+            return Tuple::vector(point.x, 0., 0.);
+        } else if maxc == &point.y.abs() {
+            return Tuple::vector(0., point.y, 0.);
+        }
+
+        Tuple::vector(0., 0., point.z)
     }
 }
 
@@ -131,6 +147,51 @@ mod tests {
             assert_eq!(xs.clone().unwrap().len(), 2);
             assert_eq!(xs.clone().unwrap()[0].t, t1);
             assert_eq!(xs.clone().unwrap()[1].t, t2);
+        }
+    }
+
+    #[test]
+    fn a_ray_misses_a_cube() {
+        let c = Cube::default();
+
+        #[rustfmt::skip]
+        let examples = vec![
+            (Tuple::point(-2.,  0.,  0.), Tuple::vector(0.2673, 0.5345, 0.8018)),
+            (Tuple::point( 0., -2.,  0.), Tuple::vector(0.8018, 0.2673, 0.5345)),
+            (Tuple::point( 0.,  0., -2.), Tuple::vector(0.5345, 0.8018, 0.2673)),
+            (Tuple::point( 2.,  0.,  2.), Tuple::vector( 0.,  0., -1.)),
+            (Tuple::point( 0.,  2.,  2.), Tuple::vector( 0., -1.,  0.)),
+            (Tuple::point( 2.,  2.,  0.), Tuple::vector(-1.,  0.,  0.)),
+        ];
+
+        for (origin, direction) in examples.into_iter() {
+            let r = Ray::new(origin, direction);
+            let xs = c.local_intersect(&r);
+
+            assert!(xs.is_none());
+        }
+    }
+
+    #[test]
+    fn the_normal_on_the_surface_of_a_cube() {
+        let c = Cube::default();
+
+        #[rustfmt::skip]
+        let examples = vec![
+            (Tuple::point(  1.,  0.5, -0.8), Tuple::vector( 1.,  0.,  0.)),
+            (Tuple::point( -1., -0.2,  0.9), Tuple::vector(-1.,  0.,  0.)),
+            (Tuple::point(-0.4,   1., -0.1), Tuple::vector( 0.,  1.,  0.)),
+            (Tuple::point( 0.3,  -1., -0.7), Tuple::vector( 0., -1.,  0.)),
+            (Tuple::point(-0.6,  0.3,  1.0), Tuple::vector( 0.,  0.,  1.)),
+            (Tuple::point( 0.4,  0.4, -1.0), Tuple::vector( 0.,  0., -1.)),
+            (Tuple::point(  1.,   1.,  1.0), Tuple::vector( 1.,  0.,  0.)),
+            (Tuple::point( -1.,  -1., -1.0), Tuple::vector(-1.,  0.,  0.)),
+        ];
+
+        for (point, normal) in examples.into_iter() {
+            let c_normal = c.local_normal_at(point);
+
+            assert_eq!(c_normal, normal);
         }
     }
 }

@@ -9,6 +9,7 @@ use ray_tracer::matrix::Matrix;
 use ray_tracer::patterns::checkers::Checkers;
 use ray_tracer::patterns::gradient::Gradient;
 use ray_tracer::patterns::Pattern;
+use ray_tracer::shapes::cube::Cube;
 use ray_tracer::shapes::{plane::Plane, sphere::Sphere, Shape};
 use ray_tracer::world::World;
 use ray_tracer::{color::Color, tuple::Tuple};
@@ -21,21 +22,33 @@ fn main() -> std::io::Result<()> {
         .set_pattern(Checkers::new(Color::new(0.2, 0.2, 0.2), Color::new(0.5, 0.5, 0.5)).into());
 
     let floor = Plane::default().set_material(walls_material);
-    let wall = Plane::default()
+
+    let cube = Cube::default()
         .set_material(
             Material::default()
-                .set_color(Color::new(0., 0., 0.))
-                .set_reflective(0.9)
+                .set_color(Color::new(0.1, 0., 0.))
+                .set_transparency(1.)
                 .set_refractive_index(1.5)
-                .set_ambient(0.)
-                .set_diffuse(0.)
-                .set_specular(0.1),
+                .set_ambient(0.1)
+                .set_diffuse(0.1)
+                .set_specular(1.)
+                .set_shininess(300.),
         )
         .set_transform(
             Matrix::identity()
-                .rotation_x(PI / 2.)
-                .rotation_y(PI / 2.2)
-                .translation(0., 0., 15.),
+                .scaling(0.5, 0.5, 0.5)
+                .translation(-0.5, 0.5, -1.5),
+        );
+
+    let cube2 = Cube::default()
+        .set_material(Material::default().set_pattern(
+            Checkers::new(Color::new(0.7, 0.2, 0.2), Color::new(0.5, 0.5, 0.5)).into(),
+        ))
+        .set_transform(
+            Matrix::identity()
+                .scaling(0.3, 0.3, 0.3)
+                .rotation_y(PI / 4.)
+                .translation(1.5, 0.3, -1.5),
         );
 
     let sky = Plane::default()
@@ -119,17 +132,18 @@ fn main() -> std::io::Result<()> {
             sky.into(),
             middle.into(),
             middle2.into(),
+            cube.into(),
+            cube2.into(),
             right.into(),
             left.into(),
-            // wall.into(),
         ],
     );
 
     // 4K - 4096 × 3112
     // 8K - 7680 × 4320
 
-    let camera = Camera::new(4096, 3112, PI / 3.).set_transform(Matrix::identity().view_transform(
-        Tuple::point(0., 2., -5.),
+    let camera = Camera::new(1500, 1000, PI / 3.).set_transform(Matrix::identity().view_transform(
+        Tuple::point(0., 2., -7.),
         Tuple::point(0., 1., 0.),
         Tuple::vector(0., 1., 0.),
     ));
