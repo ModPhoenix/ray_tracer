@@ -40,6 +40,16 @@ impl Camera {
         }
     }
 
+    /// Get a reference to the camera's hsize.
+    pub fn hsize(&self) -> usize {
+        self.hsize
+    }
+
+    /// Get a reference to the camera's vsize.
+    pub fn vsize(&self) -> usize {
+        self.vsize
+    }
+
     pub fn set_transform(mut self, transform: Matrix<4>) -> Self {
         self.transform = transform;
         self

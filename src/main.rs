@@ -1,6 +1,4 @@
 use std::f64::consts::PI;
-use std::fs::File;
-use std::io::prelude::*;
 
 use ray_tracer::camera::Camera;
 use ray_tracer::light::Light;
@@ -8,6 +6,7 @@ use ray_tracer::material::Material;
 use ray_tracer::matrix::Matrix;
 use ray_tracer::patterns::checkers::Checkers;
 use ray_tracer::patterns::gradient::Gradient;
+use ray_tracer::patterns::ring::Ring;
 use ray_tracer::patterns::Pattern;
 use ray_tracer::shapes::cube::Cube;
 use ray_tracer::shapes::{plane::Plane, sphere::Sphere, Shape};
@@ -15,13 +14,13 @@ use ray_tracer::world::World;
 use ray_tracer::{color::Color, tuple::Tuple};
 
 fn main() -> std::io::Result<()> {
-    let walls_material = Material::default()
+    let floor_material = Material::default()
         .set_color(Color::new(1., 0.9, 0.9))
         .set_specular(0.)
         .set_reflective(0.2)
-        .set_pattern(Checkers::new(Color::new(0.2, 0.2, 0.2), Color::new(0.5, 0.5, 0.5)).into());
+        .set_pattern(Ring::new(Color::new(0.2, 0.2, 0.2), Color::new(0.5, 0.5, 0.5)).into());
 
-    let floor = Plane::default().set_material(walls_material);
+    let floor = Plane::default().set_material(floor_material);
 
     let cube = Cube::default()
         .set_material(
@@ -41,9 +40,10 @@ fn main() -> std::io::Result<()> {
         );
 
     let cube2 = Cube::default()
-        .set_material(Material::default().set_pattern(
-            Checkers::new(Color::new(0.7, 0.2, 0.2), Color::new(0.5, 0.5, 0.5)).into(),
-        ))
+        .set_material(
+            Material::default()
+                .set_pattern(Checkers::new(Color::new(1., 1., 0.), Color::new(0., 1., 1.)).into()),
+        )
         .set_transform(
             Matrix::identity()
                 .scaling(0.3, 0.3, 0.3)
@@ -139,10 +139,10 @@ fn main() -> std::io::Result<()> {
         ],
     );
 
-    // 4K - 4096 × 3112
+    // 4K - 3840 × 2160
     // 8K - 7680 × 4320
 
-    let camera = Camera::new(1500, 1000, PI / 3.).set_transform(Matrix::identity().view_transform(
+    let camera = Camera::new(3840, 2160, PI / 3.).set_transform(Matrix::identity().view_transform(
         Tuple::point(0., 2., -7.),
         Tuple::point(0., 1., 0.),
         Tuple::vector(0., 1., 0.),
@@ -150,8 +150,9 @@ fn main() -> std::io::Result<()> {
 
     let canvas = camera.render(world);
 
-    let mut file = File::create("output.ppm")?;
-    file.write_all(&canvas.to_ppm().as_bytes())?;
+    let img = image::load_from_memory(&canvas.to_ppm().as_bytes()).unwrap();
+
+    img.save("scene.png").unwrap();
 
     Ok(())
 }
