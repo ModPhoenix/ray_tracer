@@ -8,7 +8,6 @@ pub mod material;
 pub mod matrix;
 pub mod patterns;
 pub mod ray;
-pub mod rgb;
 pub mod shapes;
 pub mod tuple;
 pub mod utils;

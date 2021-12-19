@@ -1,24 +1,23 @@
 use std::f64::consts::PI;
 
-use ray_tracer::camera::Camera;
-use ray_tracer::light::Light;
-use ray_tracer::material::Material;
-use ray_tracer::matrix::Matrix;
-use ray_tracer::patterns::checkers::Checkers;
-use ray_tracer::patterns::gradient::Gradient;
-use ray_tracer::patterns::ring::Ring;
-use ray_tracer::patterns::Pattern;
-use ray_tracer::shapes::cube::Cube;
-use ray_tracer::shapes::{plane::Plane, sphere::Sphere, Shape};
-use ray_tracer::world::World;
-use ray_tracer::{color::Color, tuple::Tuple};
+use ray_tracer::{
+    camera::Camera,
+    color::Color,
+    light::Light,
+    material::Material,
+    matrix::Matrix,
+    patterns::{checkers::Checkers, gradient::Gradient, Pattern},
+    shapes::{cube::Cube, plane::Plane, sphere::Sphere, Shape},
+    tuple::Tuple,
+    world::World,
+};
 
 fn main() -> std::io::Result<()> {
     let floor_material = Material::default()
         .set_color(Color::new(1., 0.9, 0.9))
         .set_specular(0.)
         .set_reflective(0.2)
-        .set_pattern(Ring::new(Color::new(0.2, 0.2, 0.2), Color::new(0.5, 0.5, 0.5)).into());
+        .set_pattern(Checkers::new(Color::new(0.2, 0.2, 0.2), Color::new(0.5, 0.5, 0.5)).into());
 
     let floor = Plane::default().set_material(floor_material);
 
@@ -142,7 +141,7 @@ fn main() -> std::io::Result<()> {
     // 4K - 3840 × 2160
     // 8K - 7680 × 4320
 
-    let camera = Camera::new(3840, 2160, PI / 3.).set_transform(Matrix::identity().view_transform(
+    let camera = Camera::new(1000, 500, PI / 3.).set_transform(Matrix::identity().view_transform(
         Tuple::point(0., 2., -7.),
         Tuple::point(0., 1., 0.),
         Tuple::vector(0., 1., 0.),
