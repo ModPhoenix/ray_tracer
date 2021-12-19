@@ -91,13 +91,14 @@ fn main() -> std::io::Result<()> {
     let middle2 = Sphere::default()
         .set_material(
             Material::default()
-                .set_color(RGB::new(66, 165, 245).into())
+                .set_color(RGB::new(255, 192, 203).into())
                 // .set_transparency(1.)
                 // .set_refractive_index(1.5)
                 // .set_ambient(0.1)
                 // .set_diffuse(0.1)
                 // .set_specular(0.1)
                 // .set_shininess(300.),
+                .set_reflective(0.4),
         )
         .set_transform(
             Matrix::identity()
