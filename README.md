@@ -16,12 +16,23 @@ You can apply various transformations and material settings to the object. All o
 
 ### Examples of rendered scenes
 
+![Reflection and Refraction and Cubes](progress/chapter_12_01.png)
 ![Reflection and Refraction](progress/chapter_11_02.png)
 ![Three spheres on a plane with patterns](progress/chapter_10_03.png)
 ![Three spheres on a plane](progress/chapter_09_01.png)
 ![Three spheres on a plane from afar](progress/chapter_09_02.png)
 ![Three spheres with shadows](progress/chapter_08_03.png)
 ![Three spheres with shadows from above](progress/chapter_08_02.png)
+
+## Getting started
+
+You can customize the scene in `src/main.rs` file and then render an image using `cargo run`, image file will be named `scene.png`.
+
+```sh
+cargo run --release
+
+open scene.png
+```
 
 ## Progress in the book
 
