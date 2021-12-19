@@ -2,7 +2,7 @@ use std::f64::consts::PI;
 
 use ray_tracer::{
     camera::Camera,
-    color::Color,
+    color::{Color, RGB},
     light::Light,
     material::Material,
     matrix::Matrix,
@@ -13,13 +13,32 @@ use ray_tracer::{
 };
 
 fn main() -> std::io::Result<()> {
-    let floor_material = Material::default()
-        .set_color(Color::new(1., 0.9, 0.9))
-        .set_specular(0.)
-        .set_reflective(0.2)
-        .set_pattern(Checkers::new(Color::new(0.2, 0.2, 0.2), Color::new(0.5, 0.5, 0.5)).into());
+    let mirror_material = Material::default()
+        .set_color(RGB::new(0, 0, 0).into())
+        .set_specular(0.2)
+        .set_reflective(0.9);
 
-    let floor = Plane::default().set_material(floor_material);
+    let mirror = Cube::default().set_material(mirror_material).set_transform(
+        Matrix::identity()
+            .scaling(2., 2., 0.1)
+            .translation(0., 0.5, 2.),
+    );
+
+    let mirror2 = mirror.clone().set_transform(
+        Matrix::identity()
+            .scaling(2., 2., 0.1)
+            .translation(0., 0.5, -6.),
+    );
+
+    let floor = Plane::default().set_material(
+        Material::default()
+            .set_color(Color::new(1., 0.9, 0.9))
+            .set_specular(0.2)
+            .set_reflective(0.4)
+            .set_pattern(
+                Checkers::new(RGB::new(160, 86, 0).into(), RGB::new(24, 24, 24).into()).into(),
+            ),
+    );
 
     let cube = Cube::default()
         .set_material(
@@ -72,18 +91,18 @@ fn main() -> std::io::Result<()> {
     let middle2 = Sphere::default()
         .set_material(
             Material::default()
-                .set_color(Color::new(0., 0.1, 0.))
-                .set_transparency(1.)
-                .set_refractive_index(1.5)
-                .set_ambient(0.1)
-                .set_diffuse(0.1)
-                .set_specular(0.1)
-                .set_shininess(300.),
+                .set_color(RGB::new(66, 165, 245).into())
+                // .set_transparency(1.)
+                // .set_refractive_index(1.5)
+                // .set_ambient(0.1)
+                // .set_diffuse(0.1)
+                // .set_specular(0.1)
+                // .set_shininess(300.),
         )
         .set_transform(
             Matrix::identity()
                 .scaling(0.5, 0.5, 0.5)
-                .translation(0., 0.5, -0.5),
+                .translation(1.5, 0.5, -0.5),
         );
 
     let right = Sphere::default()
@@ -100,7 +119,7 @@ fn main() -> std::io::Result<()> {
         .set_transform(
             Matrix::identity()
                 .scaling(0.5, 0.5, 0.5)
-                .translation(1.5, 0.5, -0.5),
+                .translation(0., 0.5, -0.5),
         );
 
     let left = Sphere::default()
@@ -123,16 +142,15 @@ fn main() -> std::io::Result<()> {
 
     let world = World::new(
         Some(Light::new(
-            Tuple::point(-10., 10., -10.),
+            Tuple::point(-10., 10., -8.),
             Color::new(1., 1., 1.),
         )),
         vec![
+            mirror.into(),
+            mirror2.into(),
             floor.into(),
             sky.into(),
-            middle.into(),
             middle2.into(),
-            cube.into(),
-            cube2.into(),
             right.into(),
             left.into(),
         ],
@@ -141,8 +159,8 @@ fn main() -> std::io::Result<()> {
     // 4K - 3840 × 2160
     // 8K - 7680 × 4320
 
-    let camera = Camera::new(1000, 500, PI / 3.).set_transform(Matrix::identity().view_transform(
-        Tuple::point(0., 2., -7.),
+    let camera = Camera::new(3840, 2160, PI / 3.).set_transform(Matrix::identity().view_transform(
+        Tuple::point(0., 1.5, -5.),
         Tuple::point(0., 1., 0.),
         Tuple::vector(0., 1., 0.),
     ));

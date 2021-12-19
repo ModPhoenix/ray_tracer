@@ -4,6 +4,7 @@ use crate::{canvas::Canvas, matrix::Matrix, ray::Ray, tuple::Tuple, world::World
 pub struct Camera {
     hsize: usize,
     vsize: usize,
+    #[allow(dead_code)]
     field_of_view: f64,
     half_width: f64,
     half_height: f64,
@@ -77,7 +78,7 @@ impl Camera {
         for y in 0..self.vsize {
             for x in 0..self.hsize {
                 let ray = self.ray_for_pixel(x, y);
-                let color = world.color_at(&ray, 5);
+                let color = world.color_at(&ray, 20);
 
                 image.set(x, y, &color);
             }

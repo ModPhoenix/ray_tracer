@@ -6,9 +6,9 @@ use super::RGB;
 
 #[derive(Debug, Clone)]
 pub struct Color {
-    pub red: f64,
-    pub green: f64,
-    pub blue: f64,
+    red: f64,
+    green: f64,
+    blue: f64,
 }
 
 impl Color {
@@ -32,24 +32,27 @@ impl Color {
         }
     }
 
-    pub fn rgb(&self) -> RGB {
-        RGB::new(
-            Self::value_to_rgb(self.red),
-            Self::value_to_rgb(self.green),
-            Self::value_to_rgb(self.blue),
-        )
+    /// Get a reference to the color's red.
+    pub fn red(&self) -> f64 {
+        self.red
     }
 
-    fn clamp(x: f64) -> f64 {
+    /// Get a reference to the color's green.
+    pub fn green(&self) -> f64 {
+        self.green
+    }
+
+    /// Get a reference to the color's blue.
+    pub fn blue(&self) -> f64 {
+        self.blue
+    }
+
+    pub fn clamp(x: f64) -> f64 {
         match x {
             x if x > 1.0 => 1.0,
             x if x < 0.0 => 0.0,
             _ => x,
         }
-    }
-
-    fn value_to_rgb(value: f64) -> u8 {
-        (Self::clamp(value) * 255.0).round() as u8
     }
 }
 
@@ -106,6 +109,20 @@ impl Mul for Color {
             green: self.green * other.green,
             blue: self.blue * other.blue,
         }
+    }
+}
+
+fn rgb_value_to_color(value: u8) -> f64 {
+    (value as f64 * 100.) / (255. * 100.)
+}
+
+impl From<RGB> for Color {
+    fn from(rgb: RGB) -> Self {
+        Color::new(
+            rgb_value_to_color(rgb.red()),
+            rgb_value_to_color(rgb.green()),
+            rgb_value_to_color(rgb.blue()),
+        )
     }
 }
 

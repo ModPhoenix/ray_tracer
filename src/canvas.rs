@@ -1,4 +1,4 @@
-use crate::color::Color;
+use crate::color::{Color, RGB};
 
 #[derive(Debug)]
 pub struct Canvas {
@@ -60,10 +60,10 @@ impl Canvas {
 
         for y in 0..self.height {
             for x in 0..self.width {
-                let rgb = self.get(x, y).rgb();
-                let red = rgb.red.to_string();
-                let green = rgb.green.to_string();
-                let blue = rgb.blue.to_string();
+                let rgb: RGB = self.get(x, y).into();
+                let red = rgb.red().to_string();
+                let green = rgb.green().to_string();
+                let blue = rgb.blue().to_string();
 
                 if line_len + red.len() >= 70 {
                     let str = format!("{}{}", '\n', red);
