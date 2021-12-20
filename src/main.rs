@@ -160,7 +160,7 @@ fn main() -> std::io::Result<()> {
     // 4K - 3840 × 2160
     // 8K - 7680 × 4320
 
-    let camera = Camera::new(3840, 2160, PI / 3.).set_transform(Matrix::identity().view_transform(
+    let camera = Camera::new(1500, 1000, PI / 3.).set_transform(Matrix::identity().view_transform(
         Tuple::point(0., 1.5, -5.),
         Tuple::point(0., 1., 0.),
         Tuple::vector(0., 1., 0.),
