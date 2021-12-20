@@ -16,13 +16,12 @@ You can apply various transformations and material settings to the object. All o
 
 ### Examples of rendered scenes
 
+![Two mirrors in front of each other](progress/chapter_12_02.png)
 ![Reflection and Refraction and Cubes](progress/chapter_12_01.png)
 ![Reflection and Refraction](progress/chapter_11_02.png)
 ![Three spheres on a plane with patterns](progress/chapter_10_03.png)
 ![Three spheres on a plane](progress/chapter_09_01.png)
 ![Three spheres on a plane from afar](progress/chapter_09_02.png)
-![Three spheres with shadows](progress/chapter_08_03.png)
-![Three spheres with shadows from above](progress/chapter_08_02.png)
 
 ## Getting started
 
@@ -51,4 +50,4 @@ open scene.png
 - [ ] Chapter 13: Cylinders
 - [ ] Chapter 14: Groups
 - [ ] Chapter 15: Triangles
-- [ ] Chapter 15: Constructive Solid Geometry (CSG)
+- [ ] Chapter 16: Constructive Solid Geometry (CSG)
