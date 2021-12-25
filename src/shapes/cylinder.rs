@@ -1,8 +1,7 @@
 use uuid::Uuid;
 
 use crate::{
-    constants::EPSILON, intersections::Intersection, material::Material, matrix::Matrix, ray::Ray,
-    tuple::Tuple,
+    intersections::Intersection, material::Material, matrix::Matrix, ray::Ray, tuple::Tuple,
 };
 
 use super::Shape;
@@ -70,7 +69,10 @@ impl Shape for Cylinder {
             return None;
         }
 
-        todo!()
+        let t0 = (-b - disc.sqrt()) / (2. * a);
+        let t1 = (-b + disc.sqrt()) / (2. * a);
+
+        Some(vec![self.intersection(t0), self.intersection(t1)])
     }
 
     fn local_normal_at(&self, _: Tuple) -> Tuple {
@@ -80,7 +82,7 @@ impl Shape for Cylinder {
 
 #[cfg(test)]
 mod tests {
-    use crate::{ray::Ray, shapes::Shape, tuple::Tuple};
+    use crate::{ray::Ray, shapes::Shape, tuple::Tuple, utils::fuzzy_equal::fuzzy_equal};
 
     use super::Cylinder;
 
@@ -101,6 +103,33 @@ mod tests {
             let xs = cyl.local_intersect(&r);
 
             assert_eq!(xs, None);
+        }
+    }
+
+    #[test]
+    fn a_ray_strikes_a_cylinder() {
+        let cyl = Cylinder::default();
+
+        let examples = vec![
+            (Tuple::point(1., 0., -5.), Tuple::vector(0., 0., 1.), 5., 5.),
+            (Tuple::point(0., 0., -5.), Tuple::vector(0., 0., 1.), 4., 6.),
+            (
+                Tuple::point(0.5, 0., -5.),
+                Tuple::vector(0.1, 1., 1.),
+                6.80798,
+                7.08872,
+            ),
+        ];
+
+        for (origin, direction, t0, t1) in examples.into_iter() {
+            let direction = direction.normalize();
+            let r = Ray::new(origin, direction);
+
+            let xs = cyl.local_intersect(&r);
+
+            assert_eq!(xs.as_ref().unwrap().len(), 2);
+            assert!(fuzzy_equal(xs.as_ref().unwrap()[0].t, t0));
+            assert!(fuzzy_equal(xs.as_ref().unwrap()[1].t, t1));
         }
     }
 }

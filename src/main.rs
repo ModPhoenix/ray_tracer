@@ -40,7 +40,7 @@ fn main() -> std::io::Result<()> {
             ),
     );
 
-    let cube = Cube::default()
+    let _cube = Cube::default()
         .set_material(
             Material::default()
                 .set_color(Color::new(0.1, 0., 0.))
@@ -57,7 +57,7 @@ fn main() -> std::io::Result<()> {
                 .translation(-0.5, 0.5, -1.5),
         );
 
-    let cube2 = Cube::default()
+    let _cube2 = Cube::default()
         .set_material(
             Material::default()
                 .set_pattern(Checkers::new(Color::new(1., 1., 0.), Color::new(0., 1., 1.)).into()),
@@ -78,7 +78,7 @@ fn main() -> std::io::Result<()> {
         )
         .set_transform(Matrix::identity().translation(0., 100., 0.));
 
-    let middle = Sphere::default()
+    let _middle = Sphere::default()
         .set_material(
             Material::default()
                 .set_color(Color::new(0.1, 1., 0.5))
