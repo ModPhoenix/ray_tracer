@@ -7,7 +7,7 @@ use ray_tracer::{
     material::Material,
     matrix::Matrix,
     patterns::{checkers::Checkers, gradient::Gradient, Pattern},
-    shapes::{cube::Cube, plane::Plane, sphere::Sphere, Shape},
+    shapes::{cube::Cube, cylinder::Cylinder, plane::Plane, sphere::Sphere, Shape},
     tuple::Tuple,
     world::World,
 };
@@ -141,6 +141,8 @@ fn main() -> std::io::Result<()> {
                 .translation(-1.5, 0.33, -0.75),
         );
 
+    let cylinder = Cylinder::default();
+
     let world = World::new(
         Some(Light::new(
             Tuple::point(-10., 10., -8.),
@@ -154,6 +156,7 @@ fn main() -> std::io::Result<()> {
             middle2.into(),
             right.into(),
             left.into(),
+            cylinder.into(),
         ],
     );
 

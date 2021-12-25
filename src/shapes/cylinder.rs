@@ -75,8 +75,8 @@ impl Shape for Cylinder {
         Some(vec![self.intersection(t0), self.intersection(t1)])
     }
 
-    fn local_normal_at(&self, _: Tuple) -> Tuple {
-        todo!()
+    fn local_normal_at(&self, point: Tuple) -> Tuple {
+        Tuple::vector(point.x, 0., point.z)
     }
 }
 
@@ -130,6 +130,24 @@ mod tests {
             assert_eq!(xs.as_ref().unwrap().len(), 2);
             assert!(fuzzy_equal(xs.as_ref().unwrap()[0].t, t0));
             assert!(fuzzy_equal(xs.as_ref().unwrap()[1].t, t1));
+        }
+    }
+
+    #[test]
+    fn normal_vector_on_a_cylinder() {
+        let cyl = Cylinder::default();
+
+        let examples = vec![
+            (Tuple::point(1., 0., 0.), Tuple::vector(1., 0., 0.)),
+            (Tuple::point(0., 5., -1.), Tuple::vector(0., 0., -1.)),
+            (Tuple::point(0., -2., 1.), Tuple::vector(0., 0., 1.)),
+            (Tuple::point(-1., 1., 0.), Tuple::vector(-1., 0., 0.)),
+        ];
+
+        for (point, normal) in examples.into_iter() {
+            let n = cyl.local_normal_at(point);
+
+            assert_eq!(n, normal);
         }
     }
 }
