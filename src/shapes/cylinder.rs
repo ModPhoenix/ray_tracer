@@ -1,3 +1,5 @@
+use std::mem::swap;
+
 use uuid::Uuid;
 
 use crate::{
@@ -9,23 +11,54 @@ use super::Shape;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Cylinder {
     id: Uuid,
-    pub transform: Matrix<4>,
-    pub material: Material,
+    transform: Matrix<4>,
+    material: Material,
+    minimum: f64,
+    maximum: f64,
 }
 
 impl Cylinder {
-    pub fn new(transform: Matrix<4>, material: Material) -> Self {
+    pub fn new(transform: Matrix<4>, material: Material, minimum: f64, maximum: f64) -> Self {
         Self {
             id: Uuid::new_v4(),
             transform,
             material,
+            minimum,
+            maximum,
         }
+    }
+
+    /// Get a reference to the cylinder's minimum.
+    pub fn minimum(&self) -> f64 {
+        self.minimum
+    }
+
+    /// Set the cylinder's minimum.
+    pub fn set_minimum(&mut self, minimum: f64) -> Self {
+        self.minimum = minimum;
+        self.clone()
+    }
+
+    /// Get a reference to the cylinder's maximum.
+    pub fn maximum(&self) -> f64 {
+        self.maximum
+    }
+
+    /// Set the cylinder's maximum.
+    pub fn set_maximum(&mut self, maximum: f64) -> Self {
+        self.maximum = maximum;
+        self.clone()
     }
 }
 
 impl Default for Cylinder {
     fn default() -> Self {
-        Cylinder::new(Matrix::identity(), Material::default())
+        Cylinder::new(
+            Matrix::identity(),
+            Material::default(),
+            f64::NEG_INFINITY,
+            f64::INFINITY,
+        )
     }
 }
 
@@ -69,10 +102,26 @@ impl Shape for Cylinder {
             return None;
         }
 
-        let t0 = (-b - disc.sqrt()) / (2. * a);
-        let t1 = (-b + disc.sqrt()) / (2. * a);
+        let mut t0 = (-b - disc.sqrt()) / (2. * a);
+        let mut t1 = (-b + disc.sqrt()) / (2. * a);
 
-        Some(vec![self.intersection(t0), self.intersection(t1)])
+        if t0 > t1 {
+            swap(&mut t0, &mut t1);
+        }
+
+        let mut xs: Vec<Intersection> = vec![];
+
+        let y0 = ray.origin.y + t0 * ray.direction.y;
+        if self.minimum < y0 && y0 < self.maximum {
+            xs.push(self.intersection(t0));
+        }
+
+        let y1 = ray.origin.y + t1 * ray.direction.y;
+        if self.minimum < y1 && y1 < self.maximum {
+            xs.push(self.intersection(t1));
+        }
+
+        Some(xs)
     }
 
     fn local_normal_at(&self, point: Tuple) -> Tuple {
@@ -148,6 +197,37 @@ mod tests {
             let n = cyl.local_normal_at(point);
 
             assert_eq!(n, normal);
+        }
+    }
+
+    #[test]
+    fn the_default_minimum_and_maximum_for_a_cylinder() {
+        let cyl = Cylinder::default();
+
+        assert_eq!(cyl.minimum(), f64::NEG_INFINITY);
+        assert_eq!(cyl.maximum(), f64::INFINITY);
+    }
+
+    #[test]
+    fn intersecting_a_constrained_cylinder() {
+        let cyl = Cylinder::default().set_minimum(1.).set_maximum(2.);
+
+        let examples = vec![
+            (Tuple::point(0., 1.5, 0.), Tuple::vector(0.1, 1., 0.), 0),
+            (Tuple::point(0., 3., -5.), Tuple::vector(0., 0., 1.), 0),
+            (Tuple::point(0., 0., -5.), Tuple::vector(0., 0., 1.), 0),
+            (Tuple::point(0., 2., -5.), Tuple::vector(0., 0., 1.), 0),
+            (Tuple::point(0., 1., -5.), Tuple::vector(0., 0., 1.), 0),
+            (Tuple::point(0., 1.5, -2.), Tuple::vector(0., 0., 1.), 2),
+        ];
+
+        for (point, direction, count) in examples.into_iter() {
+            let direction = direction.normalize();
+            let r = Ray::new(point, direction);
+
+            let xs = cyl.local_intersect(&r);
+
+            assert_eq!(xs.unwrap_or(vec![]).len(), count);
         }
     }
 }

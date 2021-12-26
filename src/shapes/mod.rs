@@ -56,7 +56,7 @@ impl Shapes {
             Shapes::Sphere(shape) => shape.material,
             Shapes::Plane(shape) => shape.material,
             Shapes::Cube(shape) => shape.material,
-            Shapes::Cylinder(shape) => shape.material,
+            Shapes::Cylinder(shape) => shape.get_material(),
         }
     }
 }
