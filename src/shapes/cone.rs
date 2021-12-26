@@ -70,27 +70,25 @@ impl Cone {
         self.clone()
     }
 
-    /// checks to see if the intersection at `t` is within a radius
-    /// of 1 (the radius of cone) from the y axis.
-    pub fn check_cap(ray: &Ray, t: f64) -> bool {
-        let x = ray.origin.x + t * ray.direction.x;
-        let z = ray.origin.z + t * ray.direction.z;
-
-        (x.powf(2.) + z.powf(2.)) <= 1.
-    }
-
     pub fn intersect_caps(&self, ray: &Ray, xs: &mut Vec<Intersection>) {
+        fn check_cap(ray: &Ray, t: f64, y: f64) -> bool {
+            let x = ray.origin.x + t * ray.direction.x;
+            let z = ray.origin.z + t * ray.direction.z;
+
+            (x.powf(2.) + z.powf(2.)) <= y.powf(2.)
+        }
+
         if !self.closed || fuzzy_equal(ray.direction.y, 0.) {
             return;
         }
 
         let t = (self.minimum - ray.origin.y) / ray.direction.y;
-        if Self::check_cap(ray, t) {
+        if check_cap(ray, t, self.minimum) {
             xs.push(self.intersection(t));
         }
 
         let t = (self.maximum - ray.origin.y) / ray.direction.y;
-        if Self::check_cap(ray, t) {
+        if check_cap(ray, t, self.maximum) {
             xs.push(self.intersection(t));
         }
     }
@@ -146,7 +144,7 @@ impl Shape for Cone {
         if a == 0. && b != 0. {
             let t = -c / (2. * b);
             xs.push(self.intersection(t));
-        } else if a >= 0. {
+        } else if a.abs() >= 0. {
             let disc = b.powf(2.) - 4. * a * c;
             if disc < 0. {
                 return None;
@@ -187,7 +185,13 @@ impl Shape for Cone {
         } else if dist < 1. && point.y <= self.minimum + EPSILON {
             return Tuple::vector(0., -1., 0.);
         } else {
-            return Tuple::vector(point.x, 0., point.z);
+            let mut y = (point.x.powf(2.) + point.z.powf(2.)).sqrt();
+
+            if point.y > 0. {
+                y = -y;
+            }
+
+            return Tuple::vector(point.x, y, point.z);
         }
     }
 }
@@ -255,5 +259,51 @@ mod tests {
 
         assert_eq!(xs.as_ref().unwrap().len(), 1);
         assert!(fuzzy_equal(xs.as_ref().unwrap()[0].t, 0.35355));
+    }
+
+    #[test]
+    fn intersecting_a_cones_end_caps() {
+        let cone = Cone::default()
+            .set_minimum(-0.5)
+            .set_maximum(0.5)
+            .set_closed(true);
+
+        let examples = vec![
+            (Tuple::point(0., 0., -5.), Tuple::vector(0., 1., 0.), 0),
+            (Tuple::point(0., 0., -0.25), Tuple::vector(0., 1., 1.), 2),
+            (Tuple::point(0., 0., -0.25), Tuple::vector(0., 1., 0.), 4),
+        ];
+
+        for (origin, direction, count) in examples.into_iter() {
+            let direction = direction.normalize();
+            let r = Ray::new(origin, direction);
+
+            let xs = cone.local_intersect(&r);
+
+            assert_eq!(xs.unwrap_or(vec![]).len(), count);
+        }
+    }
+
+    #[test]
+    fn computing_the_normal_vector_on_a_cone() {
+        let cone = Cone::default()
+            .set_minimum(-0.5)
+            .set_maximum(0.5)
+            .set_closed(true);
+
+        let examples = vec![
+            (Tuple::point(0., 0., 0.), Tuple::vector(0., 0., 0.)),
+            (
+                Tuple::point(1., 1., 1.),
+                Tuple::vector(1., -2.0_f64.sqrt(), 1.),
+            ),
+            (Tuple::point(-1., -1., 0.), Tuple::vector(-1., 1., 0.)),
+        ];
+
+        for (point, normal) in examples.into_iter() {
+            let n = cone.local_normal_at(point);
+
+            assert_eq!(n, normal);
+        }
     }
 }
