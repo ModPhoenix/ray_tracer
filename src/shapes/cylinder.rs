@@ -70,27 +70,25 @@ impl Cylinder {
         self.clone()
     }
 
-    /// checks to see if the intersection at `t` is within a radius
-    /// of 1 (the radius of cylinder) from the y axis.
-    pub fn check_cap(ray: &Ray, t: f64) -> bool {
-        let x = ray.origin.x + t * ray.direction.x;
-        let z = ray.origin.z + t * ray.direction.z;
-
-        (x.powf(2.) + z.powf(2.)) <= 1.
-    }
-
     pub fn intersect_caps(&self, ray: &Ray, xs: &mut Vec<Intersection>) {
+        fn check_cap(ray: &Ray, t: f64) -> bool {
+            let x = ray.origin.x + t * ray.direction.x;
+            let z = ray.origin.z + t * ray.direction.z;
+
+            (x.powf(2.) + z.powf(2.)) <= 1.
+        }
+
         if !self.closed || fuzzy_equal(ray.direction.y, 0.) {
             return;
         }
 
         let t = (self.minimum - ray.origin.y) / ray.direction.y;
-        if Self::check_cap(ray, t) {
+        if check_cap(ray, t) {
             xs.push(self.intersection(t));
         }
 
         let t = (self.maximum - ray.origin.y) / ray.direction.y;
-        if Self::check_cap(ray, t) {
+        if check_cap(ray, t) {
             xs.push(self.intersection(t));
         }
     }

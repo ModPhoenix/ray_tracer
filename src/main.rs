@@ -7,7 +7,7 @@ use ray_tracer::{
     material::Material,
     matrix::Matrix,
     patterns::{checkers::Checkers, gradient::Gradient, Pattern},
-    shapes::{cube::Cube, cylinder::Cylinder, plane::Plane, sphere::Sphere, Shape},
+    shapes::{cone::Cone, cube::Cube, cylinder::Cylinder, plane::Plane, sphere::Sphere, Shape},
     tuple::Tuple,
     world::World,
 };
@@ -18,11 +18,13 @@ fn main() -> std::io::Result<()> {
         .set_specular(0.2)
         .set_reflective(0.9);
 
-    let mirror = Cube::default().set_material(mirror_material).set_transform(
-        Matrix::identity()
-            .scaling(2., 2., 0.1)
-            .translation(0., 0.5, 2.),
-    );
+    let mirror = Cube::default()
+        .set_material(mirror_material.clone())
+        .set_transform(
+            Matrix::identity()
+                .scaling(2., 2., 0.1)
+                .translation(0., 0.5, 2.),
+        );
 
     let mirror2 = mirror.clone().set_transform(
         Matrix::identity()
@@ -119,11 +121,11 @@ fn main() -> std::io::Result<()> {
         )
         .set_transform(
             Matrix::identity()
-                .scaling(0.5, 0.5, 0.5)
-                .translation(0., 0.5, -0.5),
+                .scaling(0.2, 0.2, 0.2)
+                .translation(0., 0.7, -0.5),
         );
 
-    let left = Sphere::default()
+    let _left = Sphere::default()
         .set_material(
             Material::default()
                 .set_color(Color::new(1., 0., 1.))
@@ -144,7 +146,36 @@ fn main() -> std::io::Result<()> {
     let cylinder = Cylinder::default()
         .set_minimum(0.)
         .set_maximum(1.)
-        .set_closed(true);
+        .set_closed(true)
+        .set_material(
+            Material::default()
+                .set_color(RGB::new(100, 172, 143).into())
+                .set_reflective(0.2),
+        )
+        .set_transform(
+            Matrix::identity()
+                .scaling(0.3, 0.8, 0.3)
+                .translation(-1.5, 0., -0.5),
+        );
+
+    let cone = Cone::default()
+        .set_minimum(0.)
+        .set_maximum(1.)
+        .set_closed(true)
+        .set_material(
+            Material::default().set_pattern(
+                Checkers::new(
+                    RGB::new(169, 109, 142).into(),
+                    RGB::new(187, 202, 204).into(),
+                )
+                .into(),
+            ),
+        )
+        .set_transform(
+            Matrix::identity()
+                .scaling(0.5, 0.5, 0.5)
+                .translation(0., 0., -0.5),
+        );
 
     let world = World::new(
         Some(Light::new(
@@ -158,16 +189,16 @@ fn main() -> std::io::Result<()> {
             sky.into(),
             middle2.into(),
             right.into(),
-            left.into(),
             cylinder.into(),
+            cone.into(),
         ],
     );
 
     // 4K - 3840 × 2160
     // 8K - 7680 × 4320
 
-    let camera = Camera::new(1500, 1000, PI / 3.).set_transform(Matrix::identity().view_transform(
-        Tuple::point(0., 1.5, -5.),
+    let camera = Camera::new(3840, 2160, PI / 3.).set_transform(Matrix::identity().view_transform(
+        Tuple::point(-2., 1.5, -5.),
         Tuple::point(0., 1., 0.),
         Tuple::vector(0., 1., 0.),
     ));
