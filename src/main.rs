@@ -141,7 +141,10 @@ fn main() -> std::io::Result<()> {
                 .translation(-1.5, 0.33, -0.75),
         );
 
-    let cylinder = Cylinder::default().set_minimum(0.).set_maximum(1.);
+    let cylinder = Cylinder::default()
+        .set_minimum(0.)
+        .set_maximum(1.)
+        .set_closed(true);
 
     let world = World::new(
         Some(Light::new(
