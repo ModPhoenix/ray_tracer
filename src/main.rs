@@ -7,7 +7,7 @@ use ray_tracer::{
     material::Material,
     matrix::Matrix,
     patterns::{checkers::Checkers, gradient::Gradient, Pattern},
-    shapes::{cube::Cube, plane::Plane, sphere::Sphere, Shape},
+    shapes::{cube::Cube, cylinder::Cylinder, plane::Plane, sphere::Sphere, Shape},
     tuple::Tuple,
     world::World,
 };
@@ -40,7 +40,7 @@ fn main() -> std::io::Result<()> {
             ),
     );
 
-    let cube = Cube::default()
+    let _cube = Cube::default()
         .set_material(
             Material::default()
                 .set_color(Color::new(0.1, 0., 0.))
@@ -57,7 +57,7 @@ fn main() -> std::io::Result<()> {
                 .translation(-0.5, 0.5, -1.5),
         );
 
-    let cube2 = Cube::default()
+    let _cube2 = Cube::default()
         .set_material(
             Material::default()
                 .set_pattern(Checkers::new(Color::new(1., 1., 0.), Color::new(0., 1., 1.)).into()),
@@ -78,7 +78,7 @@ fn main() -> std::io::Result<()> {
         )
         .set_transform(Matrix::identity().translation(0., 100., 0.));
 
-    let middle = Sphere::default()
+    let _middle = Sphere::default()
         .set_material(
             Material::default()
                 .set_color(Color::new(0.1, 1., 0.5))
@@ -141,6 +141,11 @@ fn main() -> std::io::Result<()> {
                 .translation(-1.5, 0.33, -0.75),
         );
 
+    let cylinder = Cylinder::default()
+        .set_minimum(0.)
+        .set_maximum(1.)
+        .set_closed(true);
+
     let world = World::new(
         Some(Light::new(
             Tuple::point(-10., 10., -8.),
@@ -154,13 +159,14 @@ fn main() -> std::io::Result<()> {
             middle2.into(),
             right.into(),
             left.into(),
+            cylinder.into(),
         ],
     );
 
     // 4K - 3840 × 2160
     // 8K - 7680 × 4320
 
-    let camera = Camera::new(3840, 2160, PI / 3.).set_transform(Matrix::identity().view_transform(
+    let camera = Camera::new(1500, 1000, PI / 3.).set_transform(Matrix::identity().view_transform(
         Tuple::point(0., 1.5, -5.),
         Tuple::point(0., 1., 0.),
         Tuple::vector(0., 1., 0.),

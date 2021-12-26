@@ -4,9 +4,10 @@ use crate::{
     intersections::Intersection, material::Material, matrix::Matrix, ray::Ray, tuple::Tuple,
 };
 
-use self::{cube::Cube, plane::Plane, sphere::Sphere};
+use self::{cube::Cube, cylinder::Cylinder, plane::Plane, sphere::Sphere};
 
 pub mod cube;
+pub mod cylinder;
 pub mod plane;
 pub mod sphere;
 
@@ -46,6 +47,7 @@ pub enum Shapes {
     Sphere(Sphere),
     Plane(Plane),
     Cube(Cube),
+    Cylinder(Cylinder),
 }
 
 impl Shapes {
@@ -54,6 +56,7 @@ impl Shapes {
             Shapes::Sphere(shape) => shape.material,
             Shapes::Plane(shape) => shape.material,
             Shapes::Cube(shape) => shape.material,
+            Shapes::Cylinder(shape) => shape.get_material(),
         }
     }
 }
@@ -64,6 +67,7 @@ impl Shape for Shapes {
             Shapes::Sphere(shape) => shape.id(),
             Shapes::Plane(shape) => shape.id(),
             Shapes::Cube(shape) => shape.id(),
+            Shapes::Cylinder(shape) => shape.id(),
         }
     }
 
@@ -72,6 +76,7 @@ impl Shape for Shapes {
             Shapes::Sphere(shape) => shape.get_material(),
             Shapes::Plane(shape) => shape.get_material(),
             Shapes::Cube(shape) => shape.get_material(),
+            Shapes::Cylinder(shape) => shape.get_material(),
         }
     }
 
@@ -80,6 +85,7 @@ impl Shape for Shapes {
             Shapes::Sphere(shape) => shape.set_material(material).into(),
             Shapes::Plane(shape) => shape.set_material(material).into(),
             Shapes::Cube(shape) => shape.set_material(material).into(),
+            Shapes::Cylinder(shape) => shape.set_material(material).into(),
         }
     }
 
@@ -88,6 +94,7 @@ impl Shape for Shapes {
             Shapes::Sphere(shape) => shape.get_transform(),
             Shapes::Plane(shape) => shape.get_transform(),
             Shapes::Cube(shape) => shape.get_transform(),
+            Shapes::Cylinder(shape) => shape.get_transform(),
         }
     }
 
@@ -96,6 +103,7 @@ impl Shape for Shapes {
             Shapes::Sphere(shape) => shape.set_transform(transform).into(),
             Shapes::Plane(shape) => shape.set_transform(transform).into(),
             Shapes::Cube(shape) => shape.set_transform(transform).into(),
+            Shapes::Cylinder(shape) => shape.set_transform(transform).into(),
         }
     }
 
@@ -104,6 +112,7 @@ impl Shape for Shapes {
             Shapes::Sphere(shape) => shape.intersection(t),
             Shapes::Plane(shape) => shape.intersection(t),
             Shapes::Cube(shape) => shape.intersection(t),
+            Shapes::Cylinder(shape) => shape.intersection(t),
         }
     }
 
@@ -112,6 +121,7 @@ impl Shape for Shapes {
             Shapes::Sphere(shape) => shape.local_intersect(local_ray),
             Shapes::Plane(shape) => shape.local_intersect(local_ray),
             Shapes::Cube(shape) => shape.local_intersect(local_ray),
+            Shapes::Cylinder(shape) => shape.local_intersect(local_ray),
         }
     }
 
@@ -120,6 +130,7 @@ impl Shape for Shapes {
             Shapes::Sphere(shape) => shape.local_normal_at(local_point),
             Shapes::Plane(shape) => shape.local_normal_at(local_point),
             Shapes::Cube(shape) => shape.local_normal_at(local_point),
+            Shapes::Cylinder(shape) => shape.local_normal_at(local_point),
         }
     }
 }
@@ -139,5 +150,11 @@ impl From<Plane> for Shapes {
 impl From<Cube> for Shapes {
     fn from(cube: Cube) -> Self {
         Shapes::Cube(cube)
+    }
+}
+
+impl From<Cylinder> for Shapes {
+    fn from(cylinder: Cylinder) -> Self {
+        Shapes::Cylinder(cylinder)
     }
 }
