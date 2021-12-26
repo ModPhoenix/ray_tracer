@@ -13,6 +13,7 @@ You can apply various transformations and material settings to the object. All o
 - Sphere
 - Plane
 - Cube
+- Cylinder
 
 ### Examples of rendered scenes
 
