@@ -4,8 +4,9 @@ use crate::{
     intersections::Intersection, material::Material, matrix::Matrix, ray::Ray, tuple::Tuple,
 };
 
-use self::{cube::Cube, cylinder::Cylinder, plane::Plane, sphere::Sphere};
+use self::{cone::Cone, cube::Cube, cylinder::Cylinder, plane::Plane, sphere::Sphere};
 
+pub mod cone;
 pub mod cube;
 pub mod cylinder;
 pub mod plane;
@@ -17,7 +18,7 @@ pub trait Shape {
     fn get_material(&self) -> Material;
     fn set_material(&mut self, material: Material) -> Self;
 
-    // materials
+    // transform
     fn get_transform(&self) -> Matrix<4>;
     fn set_transform(&mut self, transform: Matrix<4>) -> Self;
 
@@ -48,6 +49,7 @@ pub enum Shapes {
     Plane(Plane),
     Cube(Cube),
     Cylinder(Cylinder),
+    Cone(Cone),
 }
 
 impl Shapes {
@@ -57,6 +59,7 @@ impl Shapes {
             Shapes::Plane(shape) => shape.material,
             Shapes::Cube(shape) => shape.material,
             Shapes::Cylinder(shape) => shape.get_material(),
+            Shapes::Cone(shape) => shape.get_material(),
         }
     }
 }
@@ -68,6 +71,7 @@ impl Shape for Shapes {
             Shapes::Plane(shape) => shape.id(),
             Shapes::Cube(shape) => shape.id(),
             Shapes::Cylinder(shape) => shape.id(),
+            Shapes::Cone(shape) => shape.id(),
         }
     }
 
@@ -77,6 +81,7 @@ impl Shape for Shapes {
             Shapes::Plane(shape) => shape.get_material(),
             Shapes::Cube(shape) => shape.get_material(),
             Shapes::Cylinder(shape) => shape.get_material(),
+            Shapes::Cone(shape) => shape.get_material(),
         }
     }
 
@@ -86,6 +91,7 @@ impl Shape for Shapes {
             Shapes::Plane(shape) => shape.set_material(material).into(),
             Shapes::Cube(shape) => shape.set_material(material).into(),
             Shapes::Cylinder(shape) => shape.set_material(material).into(),
+            Shapes::Cone(shape) => shape.set_material(material).into(),
         }
     }
 
@@ -95,6 +101,7 @@ impl Shape for Shapes {
             Shapes::Plane(shape) => shape.get_transform(),
             Shapes::Cube(shape) => shape.get_transform(),
             Shapes::Cylinder(shape) => shape.get_transform(),
+            Shapes::Cone(shape) => shape.get_transform(),
         }
     }
 
@@ -104,6 +111,7 @@ impl Shape for Shapes {
             Shapes::Plane(shape) => shape.set_transform(transform).into(),
             Shapes::Cube(shape) => shape.set_transform(transform).into(),
             Shapes::Cylinder(shape) => shape.set_transform(transform).into(),
+            Shapes::Cone(shape) => shape.set_transform(transform).into(),
         }
     }
 
@@ -113,6 +121,7 @@ impl Shape for Shapes {
             Shapes::Plane(shape) => shape.intersection(t),
             Shapes::Cube(shape) => shape.intersection(t),
             Shapes::Cylinder(shape) => shape.intersection(t),
+            Shapes::Cone(shape) => shape.intersection(t),
         }
     }
 
@@ -122,6 +131,7 @@ impl Shape for Shapes {
             Shapes::Plane(shape) => shape.local_intersect(local_ray),
             Shapes::Cube(shape) => shape.local_intersect(local_ray),
             Shapes::Cylinder(shape) => shape.local_intersect(local_ray),
+            Shapes::Cone(shape) => shape.local_intersect(local_ray),
         }
     }
 
@@ -131,30 +141,37 @@ impl Shape for Shapes {
             Shapes::Plane(shape) => shape.local_normal_at(local_point),
             Shapes::Cube(shape) => shape.local_normal_at(local_point),
             Shapes::Cylinder(shape) => shape.local_normal_at(local_point),
+            Shapes::Cone(shape) => shape.local_normal_at(local_point),
         }
     }
 }
 
 impl From<Sphere> for Shapes {
-    fn from(sphere: Sphere) -> Self {
-        Shapes::Sphere(sphere)
+    fn from(shape: Sphere) -> Self {
+        Shapes::Sphere(shape)
     }
 }
 
 impl From<Plane> for Shapes {
-    fn from(plane: Plane) -> Self {
-        Shapes::Plane(plane)
+    fn from(shape: Plane) -> Self {
+        Shapes::Plane(shape)
     }
 }
 
 impl From<Cube> for Shapes {
-    fn from(cube: Cube) -> Self {
-        Shapes::Cube(cube)
+    fn from(shape: Cube) -> Self {
+        Shapes::Cube(shape)
     }
 }
 
 impl From<Cylinder> for Shapes {
-    fn from(cylinder: Cylinder) -> Self {
-        Shapes::Cylinder(cylinder)
+    fn from(shape: Cylinder) -> Self {
+        Shapes::Cylinder(shape)
+    }
+}
+
+impl From<Cone> for Shapes {
+    fn from(shape: Cone) -> Self {
+        Shapes::Cone(shape)
     }
 }
