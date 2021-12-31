@@ -7,7 +7,6 @@ use crate::tuple::Tuple;
 
 use crate::light::Light;
 
-#[derive(Debug, Clone)]
 pub struct World {
     light: Option<Light>,
     objects: Vec<Shapes>,
@@ -40,7 +39,7 @@ impl World {
         let is_shadowed = self.is_shadowed(comps.over_point);
         let surface_color = comps.object.clone().get_material().lighting(
             comps.object.clone(),
-            self.light.clone().unwrap(),
+            self.light.as_ref().unwrap(),
             comps.over_point,
             comps.eyev,
             comps.normalv,
@@ -274,7 +273,7 @@ mod tests {
 
         let r = Ray::new(Tuple::point(0., 0., 0.75), Tuple::vector(0., 0., -1.));
 
-        let c = w.clone().color_at(&r, 5);
+        let c = w.color_at(&r, 5);
 
         assert_eq!(c, inner.clone().get_material().get_color());
     }

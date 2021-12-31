@@ -108,7 +108,7 @@ impl Material {
     pub fn lighting(
         &self,
         object: Shapes,
-        light: Light,
+        light: &Light,
         point: Tuple,
         eyev: Tuple,
         normalv: Tuple,
@@ -146,7 +146,7 @@ impl Material {
             } else {
                 let factor = reflect_dot_eye.powf(self.shininess);
 
-                specular = light.intensity * self.specular * factor;
+                specular = light.intensity.clone() * self.specular * factor;
             }
         }
 
@@ -218,7 +218,7 @@ mod tests {
 
         let result = m.lighting(
             Sphere::default().into(),
-            light,
+            &light,
             position,
             eyev,
             normalv,
@@ -239,7 +239,7 @@ mod tests {
 
         let result = m.lighting(
             Sphere::default().into(),
-            light,
+            &light,
             position,
             eyev,
             normalv,
@@ -260,7 +260,7 @@ mod tests {
 
         let result = m.lighting(
             Sphere::default().into(),
-            light,
+            &light,
             position,
             eyev,
             normalv,
@@ -281,7 +281,7 @@ mod tests {
 
         let result = m.lighting(
             Sphere::default().into(),
-            light,
+            &light,
             position,
             eyev,
             normalv,
@@ -302,7 +302,7 @@ mod tests {
 
         let result = m.lighting(
             Sphere::default().into(),
-            light,
+            &light,
             position,
             eyev,
             normalv,
@@ -324,7 +324,7 @@ mod tests {
 
         let result = m.lighting(
             Sphere::default().into(),
-            light,
+            &light,
             position,
             eyev,
             normalv,
@@ -348,7 +348,7 @@ mod tests {
 
         let c1 = m.lighting(
             Sphere::default().into(),
-            light.clone(),
+            &light,
             Tuple::point(0.9, 0., 0.),
             eyev,
             normalv,
@@ -356,7 +356,7 @@ mod tests {
         );
         let c2 = m.lighting(
             Sphere::default().into(),
-            light,
+            &light,
             Tuple::point(1.1, 0., 0.),
             eyev,
             normalv,
