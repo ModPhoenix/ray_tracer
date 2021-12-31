@@ -42,7 +42,7 @@ mod tests {
         color::Color,
         matrix::Matrix,
         patterns::{test_pattern::TestPattern, Pattern},
-        shapes::{sphere::Sphere, Shape},
+        shapes::sphere::Sphere,
         tuple::Tuple,
     };
 

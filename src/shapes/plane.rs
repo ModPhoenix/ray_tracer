@@ -22,6 +22,16 @@ impl Plane {
             material,
         }
     }
+
+    pub fn set_material(&mut self, material: Material) -> Self {
+        self.material = material;
+        self.clone()
+    }
+
+    pub fn set_transform(&mut self, transform: Matrix<4>) -> Self {
+        self.transform = transform;
+        self.clone()
+    }
 }
 
 impl Default for Plane {
@@ -39,18 +49,8 @@ impl Shape for Plane {
         self.material.clone()
     }
 
-    fn set_material(&mut self, material: Material) -> Self {
-        self.material = material;
-        self.clone()
-    }
-
     fn get_transform(&self) -> Matrix<4> {
         self.transform.clone()
-    }
-
-    fn set_transform(&mut self, transform: Matrix<4>) -> Self {
-        self.transform = transform;
-        self.clone()
     }
 
     fn intersection(&self, t: f64) -> Intersection {
