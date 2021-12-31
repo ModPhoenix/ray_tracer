@@ -121,8 +121,8 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 1., 0.), Tuple::vector(0., -1., 0.));
         let xs = p.local_intersect(&r);
 
-        assert_eq!(xs.clone().unwrap().len(), 1);
-        assert_eq!(xs.clone().unwrap()[0].t, 1.);
+        assert_eq!(xs.as_ref().unwrap().len(), 1);
+        assert_eq!(xs.as_ref().unwrap()[0].t, 1.);
         assert_eq!(xs.unwrap()[0].object, p.into());
     }
 
@@ -133,8 +133,8 @@ mod tests {
         let r = Ray::new(Tuple::point(0., -1., 0.), Tuple::vector(0., 1., 0.));
         let xs = p.local_intersect(&r);
 
-        assert_eq!(xs.clone().unwrap().len(), 1);
-        assert_eq!(xs.clone().unwrap()[0].t, 1.);
+        assert_eq!(xs.as_ref().unwrap().len(), 1);
+        assert_eq!(xs.as_ref().unwrap()[0].t, 1.);
         assert_eq!(xs.unwrap()[0].object, p.into());
     }
 }

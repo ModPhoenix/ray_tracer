@@ -16,11 +16,9 @@ pub trait Shape {
     fn id(&self) -> Uuid;
     // materials
     fn get_material(&self) -> Material;
-    // fn set_material(&mut self, material: Material) -> Self;
 
     // transform
     fn get_transform(&self) -> Matrix<4>;
-    // fn set_transform(&mut self, transform: Matrix<4>) -> Self;
 
     // intersection
     fn intersection(&self, t: f64) -> Intersection;

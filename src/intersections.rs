@@ -73,7 +73,7 @@ impl ComputedIntersection {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct Intersection {
     pub t: f64,
     pub object: Shapes,
@@ -84,7 +84,7 @@ impl Intersection {
         Self { t, object }
     }
 
-    pub fn prepare_computations(&self, ray: &Ray, xs: Intersections) -> ComputedIntersection {
+    pub fn prepare_computations(&self, ray: &Ray, xs: &Intersections) -> ComputedIntersection {
         let point = ray.position(self.t);
         let mut normalv = self.object.normal_at(point);
         let eyev = -ray.direction;
@@ -105,8 +105,8 @@ impl Intersection {
 
         let mut containers: Vec<Shapes> = vec![];
 
-        for i in xs.into_iter() {
-            if Some(&i) == Some(self) {
+        for i in xs.data().iter() {
+            if Some(&i) == Some(&self) {
                 if containers.is_empty() {
                     n1 = 1.;
                 } else {
@@ -127,7 +127,7 @@ impl Intersection {
                 containers.push(i.object.clone())
             }
 
-            if Some(&i) == Some(self) {
+            if Some(&i) == Some(&self) {
                 if containers.is_empty() {
                     n2 = 1.;
                 } else {
@@ -158,7 +158,7 @@ impl Intersection {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Intersections {
     data: Vec<Intersection>,
 }
@@ -172,18 +172,19 @@ impl Intersections {
         }
     }
 
+    /// Get a reference to the intersections's data.
+    pub fn data(&self) -> &[Intersection] {
+        self.data.as_ref()
+    }
+
     pub fn len(&self) -> usize {
         self.data.len()
     }
 
-    pub fn into_iter(self) -> std::vec::IntoIter<Intersection> {
-        self.data.into_iter()
-    }
-
-    pub fn hit(&self) -> Option<Intersection> {
+    pub fn hit(&self) -> Option<&Intersection> {
         for intersection in self.data.iter() {
             if intersection.t > 0.0 {
-                return Some(intersection.clone());
+                return Some(intersection);
             }
         }
 
@@ -232,7 +233,7 @@ mod tests {
         let shape = Sphere::default();
         let i = shape.intersection(4.);
 
-        let comps = i.prepare_computations(&r, Intersections::default());
+        let comps = i.prepare_computations(&r, &Intersections::default());
 
         assert_eq!(comps.t, i.t);
         assert_eq!(comps.object, i.object);
@@ -250,7 +251,7 @@ mod tests {
         );
 
         let i = shape.intersection(2.0_f64.sqrt());
-        let comps = i.prepare_computations(&r, Intersections::default());
+        let comps = i.prepare_computations(&r, &Intersections::default());
 
         assert_eq!(
             comps.reflectv,
@@ -264,7 +265,7 @@ mod tests {
         let shape = Sphere::default();
         let i = shape.intersection(4.);
 
-        let comps = i.prepare_computations(&r, Intersections::default());
+        let comps = i.prepare_computations(&r, &Intersections::default());
 
         assert_eq!(comps.inside, false);
     }
@@ -275,7 +276,7 @@ mod tests {
         let shape = Sphere::default();
         let i = shape.intersection(1.);
 
-        let comps = i.prepare_computations(&r, Intersections::default());
+        let comps = i.prepare_computations(&r, &Intersections::default());
 
         assert_eq!(comps.point, Tuple::point(0., 0., 1.));
         assert_eq!(comps.eyev, Tuple::vector(0., 0., -1.));
@@ -301,9 +302,9 @@ mod tests {
         let s = Sphere::default();
         let i1 = s.intersection(1.0);
         let i2 = s.intersection(2.0);
-        let i = Intersections::new(vec![i2, i1.clone()]);
+        let i = Intersections::new(vec![i2, i1]);
 
-        assert_eq!(i.hit(), Some(i1));
+        assert_eq!(i.hit(), Some(&s.intersection(1.0)));
     }
 
     #[test]
@@ -311,9 +312,9 @@ mod tests {
         let s = Sphere::default();
         let i1 = s.intersection(-1.0);
         let i2 = s.intersection(1.0);
-        let i = Intersections::new(vec![i2.clone(), i1]);
+        let i = Intersections::new(vec![i2, i1]);
 
-        assert_eq!(i.hit(), Some(i2));
+        assert_eq!(i.hit(), Some(&s.intersection(1.0)));
     }
 
     #[test]
@@ -333,9 +334,9 @@ mod tests {
         let i2 = s.intersection(7.0);
         let i3 = s.intersection(-3.0);
         let i4 = s.intersection(2.0);
-        let i = Intersections::new(vec![i1, i2, i3, i4.clone()]);
+        let i = Intersections::new(vec![i1, i2, i3, i4]);
 
-        assert_eq!(i.hit(), Some(i4));
+        assert_eq!(i.hit(), Some(&s.intersection(2.0)));
     }
 
     #[test]
@@ -344,7 +345,7 @@ mod tests {
         let shape = Sphere::default().set_transform(Matrix::identity().translation(0., 0., 1.));
 
         let i = shape.intersection(5.);
-        let comps = i.prepare_computations(&r, Intersections::default());
+        let comps = i.prepare_computations(&r, &Intersections::default());
 
         assert!(comps.over_point.z < -EPSILON / 2.);
         assert!(comps.point.z > comps.over_point.z);
@@ -356,8 +357,8 @@ mod tests {
         let shape = Sphere::new_glass().set_transform(Matrix::identity().translation(0., 0., 1.));
 
         let i = shape.intersection(5.);
-        let xs = Intersections::new(vec![i.clone()]);
-        let comps = i.prepare_computations(&r, xs);
+        let xs = Intersections::new(vec![i]);
+        let comps = shape.intersection(5.).prepare_computations(&r, &xs);
 
         assert!(comps.under_point.z > EPSILON / 2.);
         assert!(comps.point.z < comps.under_point.z);
@@ -395,7 +396,7 @@ mod tests {
         ];
 
         for (index, (n1, n2)) in examples.into_iter().enumerate() {
-            let comps = xs[index].prepare_computations(&r, xs.clone());
+            let comps = xs[index].prepare_computations(&r, &xs);
 
             assert_eq!(comps.n1, n1);
             assert_eq!(comps.n2, n2);
@@ -414,7 +415,7 @@ mod tests {
             shape.intersection(-2.0_f64.sqrt() / 2.),
             shape.intersection(2.0_f64.sqrt() / 2.),
         ]);
-        let comps = xs[1].prepare_computations(&r, xs.clone());
+        let comps = xs[1].prepare_computations(&r, &xs);
         let reflectance = comps.schlick();
 
         assert_eq!(reflectance, 1.);
@@ -426,7 +427,7 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 0., 0.), Tuple::vector(0., 1., 0.));
 
         let xs = Intersections::new(vec![shape.intersection(-1.), shape.intersection(1.)]);
-        let comps = xs[1].prepare_computations(&r, xs.clone());
+        let comps = xs[1].prepare_computations(&r, &xs);
         let reflectance = comps.schlick();
 
         assert!(fuzzy_equal(reflectance, 0.04));
@@ -438,7 +439,7 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 0.99, -2.), Tuple::vector(0., 0., 1.));
 
         let xs = Intersections::new(vec![shape.intersection(1.8589)]);
-        let comps = xs[0].prepare_computations(&r, xs.clone());
+        let comps = xs[0].prepare_computations(&r, &xs);
         let reflectance = comps.schlick();
 
         assert!(fuzzy_equal(reflectance, 0.48873));

@@ -102,8 +102,8 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vector(0., 0., 1.));
         let xs = Sphere::default().intersect(&r);
 
-        assert_eq!(xs.clone().unwrap().len(), 2);
-        assert_eq!(xs.clone().unwrap()[0].t, 4.0);
+        assert_eq!(xs.as_ref().unwrap().len(), 2);
+        assert_eq!(xs.as_ref().unwrap()[0].t, 4.0);
         assert_eq!(xs.unwrap()[1].t, 6.0);
     }
 
@@ -112,8 +112,8 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 1., -5.), Tuple::vector(0., 0., 1.));
         let xs = Sphere::default().intersect(&r);
 
-        assert_eq!(xs.clone().unwrap().len(), 2);
-        assert_eq!(xs.clone().unwrap()[0].t, 5.0);
+        assert_eq!(xs.as_ref().unwrap().len(), 2);
+        assert_eq!(xs.as_ref().unwrap()[0].t, 5.0);
         assert_eq!(xs.unwrap()[1].t, 5.0);
     }
 
@@ -130,8 +130,8 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 0., 0.), Tuple::vector(0., 0., 1.));
         let xs = Sphere::default().intersect(&r);
 
-        assert_eq!(xs.clone().unwrap().len(), 2);
-        assert_eq!(xs.clone().unwrap()[0].t, -1.0);
+        assert_eq!(xs.as_ref().unwrap().len(), 2);
+        assert_eq!(xs.as_ref().unwrap()[0].t, -1.0);
         assert_eq!(xs.unwrap()[1].t, 1.0);
     }
 
@@ -140,8 +140,8 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 0., 5.), Tuple::vector(0., 0., 1.));
         let xs = Sphere::default().intersect(&r);
 
-        assert_eq!(xs.clone().unwrap().len(), 2);
-        assert_eq!(xs.clone().unwrap()[0].t, -6.0);
+        assert_eq!(xs.as_ref().unwrap().len(), 2);
+        assert_eq!(xs.as_ref().unwrap()[0].t, -6.0);
         assert_eq!(xs.unwrap()[1].t, -4.0);
     }
 
@@ -151,8 +151,8 @@ mod tests {
         let s = Sphere::default();
         let xs = s.intersect(&r);
 
-        assert_eq!(xs.clone().unwrap().len(), 2);
-        assert_eq!(xs.clone().unwrap()[0].object, s.clone().into());
+        assert_eq!(xs.as_ref().unwrap().len(), 2);
+        assert_eq!(xs.as_ref().unwrap()[0].object, s.clone().into());
         assert_eq!(xs.unwrap()[1].object, s.into());
     }
 
@@ -178,8 +178,8 @@ mod tests {
 
         let xs = s.intersect(&r);
 
-        assert_eq!(xs.clone().unwrap().len(), 2);
-        assert_eq!(xs.clone().unwrap()[0].t, 3.);
+        assert_eq!(xs.as_ref().unwrap().len(), 2);
+        assert_eq!(xs.as_ref().unwrap()[0].t, 3.);
         assert_eq!(xs.unwrap()[1].t, 7.);
     }
 

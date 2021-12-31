@@ -62,7 +62,7 @@ impl World {
         let xs = self.intersect_world(ray);
         match xs.hit() {
             Some(intersection) => {
-                let comps = intersection.prepare_computations(ray, xs);
+                let comps = intersection.prepare_computations(ray, &xs);
                 self.shade_hit(comps, remaining)
             }
             None => Color::new_black(),
@@ -208,7 +208,7 @@ mod tests {
 
         let shape = &w.objects[0];
         let i = shape.intersection(4.);
-        let comps = i.prepare_computations(&r, Intersections::default());
+        let comps = i.prepare_computations(&r, &Intersections::default());
 
         let c = w.shade_hit(comps, 5);
 
@@ -226,7 +226,7 @@ mod tests {
 
         let shape = &w.objects[1];
         let i = shape.intersection(0.5);
-        let comps = i.prepare_computations(&r, Intersections::default());
+        let comps = i.prepare_computations(&r, &Intersections::default());
 
         let c = w.shade_hit(comps, 5);
 
@@ -317,7 +317,7 @@ mod tests {
         let s2 = Sphere::default().set_transform(Matrix::identity().translation(0., 0., 10.));
         let r = Ray::new(Tuple::point(0., 0., 5.), Tuple::vector(0., 0., 1.));
         let i = Intersection::new(4., s2.clone().into());
-        let comps = i.prepare_computations(&r, Intersections::default());
+        let comps = i.prepare_computations(&r, &Intersections::default());
 
         let w = World::new(Some(light), vec![Box::new(s1), Box::new(s2)]);
         let c = w.shade_hit(comps, 5);
@@ -342,7 +342,7 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 0., 0.), Tuple::vector(0., 0., 1.));
 
         let i = w.objects[1].intersection(1.);
-        let comps = i.prepare_computations(&r, Intersections::default());
+        let comps = i.prepare_computations(&r, &Intersections::default());
         let color = w.reflected_color(&comps, 5);
 
         assert_eq!(color, Color::new_black());
@@ -363,7 +363,7 @@ mod tests {
         );
 
         let i = w.objects[2].intersection(2.0_f64.sqrt());
-        let comps = i.prepare_computations(&r, Intersections::default());
+        let comps = i.prepare_computations(&r, &Intersections::default());
         let color = w.reflected_color(&comps, 5);
 
         assert_eq!(color, Color::new(0.190332, 0.237915, 0.142749));
@@ -384,7 +384,7 @@ mod tests {
         );
 
         let i = w.objects[2].intersection(2.0_f64.sqrt());
-        let comps = i.prepare_computations(&r, Intersections::default());
+        let comps = i.prepare_computations(&r, &Intersections::default());
         let color = w.shade_hit(comps, 5);
 
         assert_eq!(color, Color::new(0.87675, 0.92434, 0.82917));
@@ -426,7 +426,7 @@ mod tests {
         );
 
         let i = w.objects[2].intersection(2.0_f64.sqrt());
-        let comps = i.prepare_computations(&r, Intersections::default());
+        let comps = i.prepare_computations(&r, &Intersections::default());
         let color = w.reflected_color(&comps, 0);
 
         assert_eq!(color, Color::new_black());
@@ -438,7 +438,7 @@ mod tests {
         let shape = w.objects.first().unwrap();
         let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vector(0., 0., 1.));
         let xs = Intersections::new(vec![shape.intersection(4.), shape.intersection(6.)]);
-        let comps = xs[0].prepare_computations(&r, xs.clone());
+        let comps = xs[0].prepare_computations(&r, &xs);
         let color = w.refracted_color(&comps, 5);
 
         assert_eq!(color, Color::new_black());
@@ -463,7 +463,7 @@ mod tests {
 
         let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vector(0., 0., 1.));
         let xs = Intersections::new(vec![shape.intersection(4.), shape.intersection(6.)]);
-        let comps = xs[0].prepare_computations(&r, xs.clone());
+        let comps = xs[0].prepare_computations(&r, &xs);
         let color = w.refracted_color(&comps, 0);
 
         assert_eq!(color, Color::new_black());
@@ -495,7 +495,7 @@ mod tests {
         ]);
         // NOTE: this time you're inside the sphere, so you need
         // to look at the second intersection, xs[1], not xs[0]
-        let comps = xs[1].prepare_computations(&r, xs.clone());
+        let comps = xs[1].prepare_computations(&r, &xs);
         let color = w.refracted_color(&comps, 5);
 
         assert_eq!(color, Color::new_black());
@@ -531,7 +531,7 @@ mod tests {
             b.intersection(0.4899),
             a.intersection(0.9899),
         ]);
-        let comps = xs[2].prepare_computations(&r, xs.clone());
+        let comps = xs[2].prepare_computations(&r, &xs);
         let color = w.refracted_color(&comps, 5);
 
         assert_eq!(color, Color::new(0., 0.99887, 0.04721));
@@ -565,7 +565,7 @@ mod tests {
             Tuple::vector(0., -2.0_f64.sqrt() / 2., 2.0_f64.sqrt() / 2.),
         );
         let xs = Intersections::new(vec![floor.intersection(2.0_f64.sqrt())]);
-        let comps = xs[0].prepare_computations(&r, xs.clone());
+        let comps = xs[0].prepare_computations(&r, &xs);
         let color = w.shade_hit(comps, 5);
 
         assert_eq!(color, Color::new(0.93642, 0.68642, 0.68642));
@@ -601,7 +601,7 @@ mod tests {
         w.objects.push(Box::new(ball));
 
         let xs = Intersections::new(vec![floor.intersection(2.0_f64.sqrt())]);
-        let comps = xs[0].prepare_computations(&r, xs.clone());
+        let comps = xs[0].prepare_computations(&r, &xs);
         let color = w.shade_hit(comps, 5);
 
         assert_eq!(color, Color::new(0.93391, 0.69643, 0.69243));
