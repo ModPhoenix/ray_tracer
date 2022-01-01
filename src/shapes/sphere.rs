@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use uuid::Uuid;
 
 use crate::{intersections::Intersection, material::Material, matrix::Matrix, tuple::Tuple};
@@ -59,7 +61,7 @@ impl Shape for Sphere {
     }
 
     fn intersection(&self, t: f64) -> Intersection {
-        Intersection::new(t, self.clone().into())
+        Intersection::new(t, Rc::new(self.clone()))
     }
 
     fn local_intersect(&self, local_ray: &crate::ray::Ray) -> Option<Vec<Intersection>> {
@@ -122,7 +124,7 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 2., -5.), Tuple::vector(0., 0., 1.));
         let xs = Sphere::default().intersect(&r);
 
-        assert_eq!(xs, None);
+        assert!(xs.is_none());
     }
 
     #[test]
@@ -152,8 +154,8 @@ mod tests {
         let xs = s.intersect(&r);
 
         assert_eq!(xs.as_ref().unwrap().len(), 2);
-        assert_eq!(xs.as_ref().unwrap()[0].object, s.clone().into());
-        assert_eq!(xs.unwrap()[1].object, s.into());
+        assert_eq!(xs.as_ref().unwrap()[0].object.id(), s.id());
+        assert_eq!(xs.unwrap()[1].object.id(), s.id());
     }
 
     #[test]
@@ -190,7 +192,7 @@ mod tests {
 
         let xs = s.intersect(&r);
 
-        assert_eq!(xs, None);
+        assert!(xs.is_none());
     }
 
     #[test]

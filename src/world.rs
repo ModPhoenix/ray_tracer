@@ -37,7 +37,8 @@ impl World {
     // TODO: add support multiple light sources
     pub fn shade_hit(&self, comps: ComputedIntersection, remaining: usize) -> Color {
         let is_shadowed = self.is_shadowed(comps.over_point);
-        let surface_color = comps.object.clone().get_material().lighting(
+        let material = comps.object.get_material();
+        let surface_color = comps.object.get_material().lighting(
             comps.object.clone(),
             self.light.as_ref().unwrap(),
             comps.over_point,
@@ -47,7 +48,6 @@ impl World {
         );
         let reflected_color = self.reflected_color(&comps, remaining);
         let refracted_color = self.refracted_color(&comps, remaining);
-        let material = comps.object.clone().get_material();
 
         if material.get_reflective() > 0. && material.get_transparency() > 0. {
             let reflectance = comps.schlick();
@@ -89,18 +89,18 @@ impl World {
     }
 
     pub fn reflected_color(&self, comps: &ComputedIntersection, remaining: usize) -> Color {
-        if remaining <= 0 || comps.object.clone().get_material().get_reflective() == 0. {
+        if remaining <= 0 || comps.object.get_material().get_reflective() == 0. {
             return Color::new_black();
         }
 
         let reflect_ray = Ray::new(comps.over_point, comps.reflectv);
         let color = self.color_at(&reflect_ray, remaining - 1);
 
-        return color * comps.object.clone().get_material().get_reflective();
+        return color * comps.object.get_material().get_reflective();
     }
 
     pub fn refracted_color(&self, comps: &ComputedIntersection, remaining: usize) -> Color {
-        if comps.object.clone().get_material().get_transparency() == 0. || remaining <= 0 {
+        if comps.object.get_material().get_transparency() == 0. || remaining <= 0 {
             return Color::new_black();
         } else {
             let n_ratio = comps.n1 / comps.n2;
@@ -117,7 +117,7 @@ impl World {
             let refract_ray = Ray::new(comps.under_point, direction);
 
             let color = self.color_at(&refract_ray, remaining - 1)
-                * comps.object.clone().get_material().get_transparency();
+                * comps.object.get_material().get_transparency();
 
             return color;
         }
@@ -135,6 +135,8 @@ impl Default for World {
 
 #[cfg(test)]
 mod tests {
+
+    use std::rc::Rc;
 
     use crate::{
         color::Color,
@@ -316,7 +318,7 @@ mod tests {
         let s1 = Sphere::default();
         let s2 = Sphere::default().set_transform(Matrix::identity().translation(0., 0., 10.));
         let r = Ray::new(Tuple::point(0., 0., 5.), Tuple::vector(0., 0., 1.));
-        let i = Intersection::new(4., s2.clone().into());
+        let i = Intersection::new(4., Rc::new(s2.clone()));
         let comps = i.prepare_computations(&r, &Intersections::default());
 
         let w = World::new(Some(light), vec![Box::new(s1), Box::new(s2)]);

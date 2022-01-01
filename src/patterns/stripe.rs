@@ -41,6 +41,8 @@ impl Pattern for Stripe {
 #[cfg(test)]
 mod tests {
 
+    use std::rc::Rc;
+
     use crate::{
         color::Color, matrix::Matrix, patterns::stripe::Stripe, shapes::sphere::Sphere,
         tuple::Tuple,
@@ -126,7 +128,7 @@ mod tests {
     fn stripes_with_an_object_transformation() {
         let object = Sphere::default().set_transform(Matrix::identity().scaling(2., 2., 2.));
         let pattern = Stripe::new(Color::new_white(), Color::new_black());
-        let c = pattern.pattern_at_shape(object.into(), Tuple::point(1.5, 0., 0.));
+        let c = pattern.pattern_at_shape(Rc::new(object), Tuple::point(1.5, 0., 0.));
 
         assert_eq!(c, Color::new_white());
     }
@@ -136,7 +138,7 @@ mod tests {
         let object = Sphere::default();
         let pattern = Stripe::new(Color::new_white(), Color::new_black())
             .set_transform(Matrix::identity().scaling(2., 2., 2.));
-        let c = pattern.pattern_at_shape(object.into(), Tuple::point(1.5, 0., 0.));
+        let c = pattern.pattern_at_shape(Rc::new(object), Tuple::point(1.5, 0., 0.));
 
         assert_eq!(c, Color::new_white());
     }
@@ -146,7 +148,7 @@ mod tests {
         let object = Sphere::default().set_transform(Matrix::identity().scaling(2., 2., 2.));
         let pattern = Stripe::new(Color::new_white(), Color::new_black())
             .set_transform(Matrix::identity().translation(0.5, 0., 0.));
-        let c = pattern.pattern_at_shape(object.into(), Tuple::point(2.5, 0., 0.));
+        let c = pattern.pattern_at_shape(Rc::new(object), Tuple::point(2.5, 0., 0.));
 
         assert_eq!(c, Color::new_white());
     }

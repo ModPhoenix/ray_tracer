@@ -1,16 +1,10 @@
-use std::ops::Index;
+use std::{borrow::Borrow, ops::Index, rc::Rc};
 
-use crate::{
-    constants::EPSILON,
-    ray::Ray,
-    shapes::{Shape, Shapes},
-    tuple::Tuple,
-};
+use crate::{constants::EPSILON, ray::Ray, shapes::Shape, tuple::Tuple};
 
-#[derive(Debug, Clone)]
 pub struct ComputedIntersection {
     pub t: f64,
-    pub object: Shapes,
+    pub object: Rc<dyn Shape>,
     pub point: Tuple,
     pub over_point: Tuple,
     pub under_point: Tuple,
@@ -25,7 +19,7 @@ pub struct ComputedIntersection {
 impl ComputedIntersection {
     pub fn new(
         t: f64,
-        object: Shapes,
+        object: Rc<dyn Shape>,
         point: Tuple,
         over_point: Tuple,
         under_point: Tuple,
@@ -73,14 +67,13 @@ impl ComputedIntersection {
     }
 }
 
-#[derive(Debug, PartialEq)]
 pub struct Intersection {
     pub t: f64,
-    pub object: Shapes,
+    pub object: Rc<dyn Shape>,
 }
 
 impl Intersection {
-    pub fn new(t: f64, object: Shapes) -> Self {
+    pub fn new(t: f64, object: Rc<dyn Shape>) -> Self {
         Self { t, object }
     }
 
@@ -103,10 +96,10 @@ impl Intersection {
         let under_point = point - normalv * EPSILON;
         let reflectv = ray.direction.reflect(normalv);
 
-        let mut containers: Vec<Shapes> = vec![];
+        let mut containers: Vec<Rc<dyn Shape>> = vec![];
 
         for i in xs.data().iter() {
-            if Some(&i) == Some(&self) {
+            if i == self {
                 if containers.is_empty() {
                     n1 = 1.;
                 } else {
@@ -127,7 +120,7 @@ impl Intersection {
                 containers.push(i.object.clone())
             }
 
-            if Some(&i) == Some(&self) {
+            if i == self {
                 if containers.is_empty() {
                     n2 = 1.;
                 } else {
@@ -158,7 +151,14 @@ impl Intersection {
     }
 }
 
-#[derive(Debug)]
+impl PartialEq for Intersection {
+    fn eq(&self, other: &Intersection) -> bool {
+        let self_obj: &dyn Shape = self.object.borrow();
+        let other_obj: &dyn Shape = other.object.borrow();
+        self.t == other.t && self_obj == other_obj
+    }
+}
+
 pub struct Intersections {
     data: Vec<Intersection>,
 }
@@ -224,7 +224,7 @@ mod tests {
         let i = s.intersection(3.5);
 
         assert_eq!(i.t, 3.5);
-        assert_eq!(i.object, s.into());
+        assert!(i.object.id() == s.id());
     }
 
     #[test]
@@ -236,7 +236,7 @@ mod tests {
         let comps = i.prepare_computations(&r, &Intersections::default());
 
         assert_eq!(comps.t, i.t);
-        assert_eq!(comps.object, i.object);
+        assert_eq!(comps.object.id(), i.object.id());
         assert_eq!(comps.point, Tuple::point(0., 0., -1.));
         assert_eq!(comps.eyev, Tuple::vector(0., 0., -1.));
         assert_eq!(comps.normalv, Tuple::vector(0., 0., -1.));
@@ -304,7 +304,10 @@ mod tests {
         let i2 = s.intersection(2.0);
         let i = Intersections::new(vec![i2, i1]);
 
-        assert_eq!(i.hit(), Some(&s.intersection(1.0)));
+        assert_eq!(
+            i.hit().unwrap().object.id(),
+            s.intersection(1.0).object.id()
+        );
     }
 
     #[test]
@@ -314,7 +317,10 @@ mod tests {
         let i2 = s.intersection(1.0);
         let i = Intersections::new(vec![i2, i1]);
 
-        assert_eq!(i.hit(), Some(&s.intersection(1.0)));
+        assert_eq!(
+            i.hit().unwrap().object.id(),
+            s.intersection(1.0).object.id()
+        );
     }
 
     #[test]
@@ -324,7 +330,7 @@ mod tests {
         let i2 = s.intersection(-1.0);
         let i = Intersections::new(vec![i2, i1]);
 
-        assert_eq!(i.hit(), None);
+        assert!(i.hit().is_none());
     }
 
     #[test]
@@ -336,7 +342,10 @@ mod tests {
         let i4 = s.intersection(2.0);
         let i = Intersections::new(vec![i1, i2, i3, i4]);
 
-        assert_eq!(i.hit(), Some(&s.intersection(2.0)));
+        assert_eq!(
+            i.hit().unwrap().object.id(),
+            s.intersection(2.0).object.id()
+        );
     }
 
     #[test]

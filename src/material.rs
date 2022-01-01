@@ -1,8 +1,10 @@
+use std::rc::Rc;
+
 use crate::{
     color::Color,
     light::Light,
     patterns::{Pattern, Patterns},
-    shapes::Shapes,
+    shapes::Shape,
     tuple::Tuple,
 };
 
@@ -107,7 +109,7 @@ impl Material {
 
     pub fn lighting(
         &self,
-        object: Shapes,
+        object: Rc<dyn Shape>,
         light: &Light,
         point: Tuple,
         eyev: Tuple,
@@ -176,6 +178,8 @@ impl Default for Material {
 
 #[cfg(test)]
 mod tests {
+    use std::rc::Rc;
+
     use crate::{
         color::Color, light::Light, material::Material, patterns::stripe::Stripe,
         shapes::sphere::Sphere, tuple::Tuple,
@@ -217,7 +221,7 @@ mod tests {
         let light = Light::new(Tuple::point(0., 0., -10.), Color::new(1., 1., 1.));
 
         let result = m.lighting(
-            Sphere::default().into(),
+            Rc::new(Sphere::default()),
             &light,
             position,
             eyev,
@@ -238,7 +242,7 @@ mod tests {
         let light = Light::new(Tuple::point(0., 0., -10.), Color::new(1., 1., 1.));
 
         let result = m.lighting(
-            Sphere::default().into(),
+            Rc::new(Sphere::default()),
             &light,
             position,
             eyev,
@@ -259,7 +263,7 @@ mod tests {
         let light = Light::new(Tuple::point(0., 10., -10.), Color::new(1., 1., 1.));
 
         let result = m.lighting(
-            Sphere::default().into(),
+            Rc::new(Sphere::default()),
             &light,
             position,
             eyev,
@@ -280,7 +284,7 @@ mod tests {
         let light = Light::new(Tuple::point(0., 10., -10.), Color::new(1., 1., 1.));
 
         let result = m.lighting(
-            Sphere::default().into(),
+            Rc::new(Sphere::default()),
             &light,
             position,
             eyev,
@@ -301,7 +305,7 @@ mod tests {
         let light = Light::new(Tuple::point(0., 0., 10.), Color::new(1., 1., 1.));
 
         let result = m.lighting(
-            Sphere::default().into(),
+            Rc::new(Sphere::default()),
             &light,
             position,
             eyev,
@@ -323,7 +327,7 @@ mod tests {
         let in_shadow = true;
 
         let result = m.lighting(
-            Sphere::default().into(),
+            Rc::new(Sphere::default()),
             &light,
             position,
             eyev,
@@ -347,7 +351,7 @@ mod tests {
         let light = Light::new(Tuple::point(0., 0., -10.), Color::new_white());
 
         let c1 = m.lighting(
-            Sphere::default().into(),
+            Rc::new(Sphere::default()),
             &light,
             Tuple::point(0.9, 0., 0.),
             eyev,
@@ -355,7 +359,7 @@ mod tests {
             false,
         );
         let c2 = m.lighting(
-            Sphere::default().into(),
+            Rc::new(Sphere::default()),
             &light,
             Tuple::point(1.1, 0., 0.),
             eyev,

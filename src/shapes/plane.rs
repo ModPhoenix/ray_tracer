@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use uuid::Uuid;
 
 use crate::{
@@ -54,7 +56,7 @@ impl Shape for Plane {
     }
 
     fn intersection(&self, t: f64) -> Intersection {
-        Intersection::new(t, self.clone().into())
+        Intersection::new(t, Rc::new(self.clone()))
     }
 
     fn local_intersect(&self, ray: &crate::ray::Ray) -> Option<Vec<Intersection>> {
@@ -101,7 +103,7 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 10., 0.), Tuple::vector(0., 0., 1.));
         let xs = p.local_intersect(&r);
 
-        assert_eq!(xs, None);
+        assert!(xs.is_none());
     }
 
     #[test]
@@ -111,7 +113,7 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 0., 0.), Tuple::vector(0., 0., 1.));
         let xs = p.local_intersect(&r);
 
-        assert_eq!(xs, None);
+        assert!(xs.is_none());
     }
 
     #[test]
@@ -123,7 +125,7 @@ mod tests {
 
         assert_eq!(xs.as_ref().unwrap().len(), 1);
         assert_eq!(xs.as_ref().unwrap()[0].t, 1.);
-        assert_eq!(xs.unwrap()[0].object, p.into());
+        assert_eq!(xs.unwrap()[0].object.id(), p.id());
     }
 
     #[test]
@@ -135,6 +137,6 @@ mod tests {
 
         assert_eq!(xs.as_ref().unwrap().len(), 1);
         assert_eq!(xs.as_ref().unwrap()[0].t, 1.);
-        assert_eq!(xs.unwrap()[0].object, p.into());
+        assert_eq!(xs.unwrap()[0].object.id(), p.id());
     }
 }

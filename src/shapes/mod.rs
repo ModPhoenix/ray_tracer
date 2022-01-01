@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use uuid::Uuid;
 
 use crate::{
@@ -12,7 +13,7 @@ use self::{plane::Plane, sphere::Sphere};
 pub mod plane;
 pub mod sphere;
 
-pub trait Shape {
+pub trait Shape: Debug {
     fn id(&self) -> Uuid;
     // materials
     fn get_material(&self) -> Material;
@@ -38,6 +39,12 @@ pub trait Shape {
         world_normal.w = 0.;
 
         world_normal.normalize()
+    }
+}
+
+impl PartialEq for dyn Shape {
+    fn eq(&self, other: &Self) -> bool {
+        self.id() == other.id()
     }
 }
 
