@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use uuid::Uuid;
 
 use crate::{
@@ -21,6 +23,16 @@ impl Cube {
             transform,
             material,
         }
+    }
+
+    pub fn set_material(&mut self, material: Material) -> Self {
+        self.material = material;
+        self.clone()
+    }
+
+    pub fn set_transform(&mut self, transform: Matrix<4>) -> Self {
+        self.transform = transform;
+        self.clone()
     }
 
     fn check_axis(origin: f64, direction: f64) -> (f64, f64) {
@@ -61,22 +73,12 @@ impl Shape for Cube {
         self.material.clone()
     }
 
-    fn set_material(&mut self, material: Material) -> Self {
-        self.material = material;
-        self.clone()
-    }
-
     fn get_transform(&self) -> Matrix<4> {
         self.transform.clone()
     }
 
-    fn set_transform(&mut self, transform: Matrix<4>) -> Self {
-        self.transform = transform;
-        self.clone()
-    }
-
     fn intersection(&self, t: f64) -> Intersection {
-        Intersection::new(t, self.clone().into())
+        Intersection::new(t, Rc::new(self.clone()))
     }
 
     fn local_intersect(&self, ray: &crate::ray::Ray) -> Option<Vec<Intersection>> {
@@ -144,9 +146,9 @@ mod tests {
             let r = Ray::new(origin, direction);
             let xs = c.local_intersect(&r);
 
-            assert_eq!(xs.clone().unwrap().len(), 2);
-            assert_eq!(xs.clone().unwrap()[0].t, t1);
-            assert_eq!(xs.clone().unwrap()[1].t, t2);
+            assert_eq!(xs.as_ref().unwrap().len(), 2);
+            assert_eq!(xs.as_ref().unwrap()[0].t, t1);
+            assert_eq!(xs.unwrap()[1].t, t2);
         }
     }
 

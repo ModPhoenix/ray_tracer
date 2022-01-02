@@ -7,7 +7,7 @@ use ray_tracer::{
     material::Material,
     matrix::Matrix,
     patterns::{checkers::Checkers, gradient::Gradient, Pattern},
-    shapes::{cone::Cone, cube::Cube, cylinder::Cylinder, plane::Plane, sphere::Sphere, Shape},
+    shapes::{cone::Cone, cube::Cube, cylinder::Cylinder, plane::Plane, sphere::Sphere},
     tuple::Tuple,
     world::World,
 };
@@ -183,14 +183,14 @@ fn main() -> std::io::Result<()> {
             Color::new(1., 1., 1.),
         )),
         vec![
-            mirror.into(),
-            mirror2.into(),
-            floor.into(),
-            sky.into(),
-            middle2.into(),
-            right.into(),
-            cylinder.into(),
-            cone.into(),
+            Box::new(mirror),
+            Box::new(mirror2),
+            Box::new(floor),
+            Box::new(sky),
+            Box::new(middle2),
+            Box::new(right),
+            Box::new(cylinder),
+            Box::new(cone),
         ],
     );
 

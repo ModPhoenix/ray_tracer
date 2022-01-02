@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use uuid::Uuid;
 
 use crate::{intersections::Intersection, material::Material, matrix::Matrix, tuple::Tuple};
@@ -27,6 +29,16 @@ impl Sphere {
                 .set_refractive_index(1.5),
         )
     }
+
+    pub fn set_material(&mut self, material: Material) -> Self {
+        self.material = material;
+        self.clone()
+    }
+
+    pub fn set_transform(&mut self, transform: Matrix<4>) -> Self {
+        self.transform = transform;
+        self.clone()
+    }
 }
 
 impl Default for Sphere {
@@ -44,22 +56,12 @@ impl Shape for Sphere {
         self.material.clone()
     }
 
-    fn set_material(&mut self, material: Material) -> Self {
-        self.material = material;
-        self.clone()
-    }
-
     fn get_transform(&self) -> Matrix<4> {
         self.transform.clone()
     }
 
-    fn set_transform(&mut self, transform: Matrix<4>) -> Self {
-        self.transform = transform;
-        self.clone()
-    }
-
     fn intersection(&self, t: f64) -> Intersection {
-        Intersection::new(t, self.clone().into())
+        Intersection::new(t, Rc::new(self.clone()))
     }
 
     fn local_intersect(&self, local_ray: &crate::ray::Ray) -> Option<Vec<Intersection>> {
@@ -102,8 +104,8 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 0., -5.), Tuple::vector(0., 0., 1.));
         let xs = Sphere::default().intersect(&r);
 
-        assert_eq!(xs.clone().unwrap().len(), 2);
-        assert_eq!(xs.clone().unwrap()[0].t, 4.0);
+        assert_eq!(xs.as_ref().unwrap().len(), 2);
+        assert_eq!(xs.as_ref().unwrap()[0].t, 4.0);
         assert_eq!(xs.unwrap()[1].t, 6.0);
     }
 
@@ -112,8 +114,8 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 1., -5.), Tuple::vector(0., 0., 1.));
         let xs = Sphere::default().intersect(&r);
 
-        assert_eq!(xs.clone().unwrap().len(), 2);
-        assert_eq!(xs.clone().unwrap()[0].t, 5.0);
+        assert_eq!(xs.as_ref().unwrap().len(), 2);
+        assert_eq!(xs.as_ref().unwrap()[0].t, 5.0);
         assert_eq!(xs.unwrap()[1].t, 5.0);
     }
 
@@ -122,7 +124,7 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 2., -5.), Tuple::vector(0., 0., 1.));
         let xs = Sphere::default().intersect(&r);
 
-        assert_eq!(xs, None);
+        assert!(xs.is_none());
     }
 
     #[test]
@@ -130,8 +132,8 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 0., 0.), Tuple::vector(0., 0., 1.));
         let xs = Sphere::default().intersect(&r);
 
-        assert_eq!(xs.clone().unwrap().len(), 2);
-        assert_eq!(xs.clone().unwrap()[0].t, -1.0);
+        assert_eq!(xs.as_ref().unwrap().len(), 2);
+        assert_eq!(xs.as_ref().unwrap()[0].t, -1.0);
         assert_eq!(xs.unwrap()[1].t, 1.0);
     }
 
@@ -140,8 +142,8 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 0., 5.), Tuple::vector(0., 0., 1.));
         let xs = Sphere::default().intersect(&r);
 
-        assert_eq!(xs.clone().unwrap().len(), 2);
-        assert_eq!(xs.clone().unwrap()[0].t, -6.0);
+        assert_eq!(xs.as_ref().unwrap().len(), 2);
+        assert_eq!(xs.as_ref().unwrap()[0].t, -6.0);
         assert_eq!(xs.unwrap()[1].t, -4.0);
     }
 
@@ -151,9 +153,9 @@ mod tests {
         let s = Sphere::default();
         let xs = s.intersect(&r);
 
-        assert_eq!(xs.clone().unwrap().len(), 2);
-        assert_eq!(xs.clone().unwrap()[0].object, s.clone().into());
-        assert_eq!(xs.unwrap()[1].object, s.into());
+        assert_eq!(xs.as_ref().unwrap().len(), 2);
+        assert_eq!(xs.as_ref().unwrap()[0].object.id(), s.id());
+        assert_eq!(xs.unwrap()[1].object.id(), s.id());
     }
 
     #[test]
@@ -178,8 +180,8 @@ mod tests {
 
         let xs = s.intersect(&r);
 
-        assert_eq!(xs.clone().unwrap().len(), 2);
-        assert_eq!(xs.clone().unwrap()[0].t, 3.);
+        assert_eq!(xs.as_ref().unwrap().len(), 2);
+        assert_eq!(xs.as_ref().unwrap()[0].t, 3.);
         assert_eq!(xs.unwrap()[1].t, 7.);
     }
 
@@ -190,7 +192,7 @@ mod tests {
 
         let xs = s.intersect(&r);
 
-        assert_eq!(xs, None);
+        assert!(xs.is_none());
     }
 
     #[test]

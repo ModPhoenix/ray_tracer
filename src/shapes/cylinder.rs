@@ -1,4 +1,4 @@
-use std::mem::swap;
+use std::{mem::swap, rc::Rc};
 
 use uuid::Uuid;
 
@@ -70,6 +70,16 @@ impl Cylinder {
         self.clone()
     }
 
+    pub fn set_material(&mut self, material: Material) -> Self {
+        self.material = material;
+        self.clone()
+    }
+
+    pub fn set_transform(&mut self, transform: Matrix<4>) -> Self {
+        self.transform = transform;
+        self.clone()
+    }
+
     pub fn intersect_caps(&self, ray: &Ray, xs: &mut Vec<Intersection>) {
         fn check_cap(ray: &Ray, t: f64) -> bool {
             let x = ray.origin.x + t * ray.direction.x;
@@ -115,22 +125,12 @@ impl Shape for Cylinder {
         self.material.clone()
     }
 
-    fn set_material(&mut self, material: Material) -> Self {
-        self.material = material;
-        self.clone()
-    }
-
     fn get_transform(&self) -> Matrix<4> {
         self.transform.clone()
     }
 
-    fn set_transform(&mut self, transform: Matrix<4>) -> Self {
-        self.transform = transform;
-        self.clone()
-    }
-
     fn intersection(&self, t: f64) -> Intersection {
-        Intersection::new(t, self.clone().into())
+        Intersection::new(t, Rc::new(self.clone()))
     }
 
     fn local_intersect(&self, ray: &Ray) -> Option<Vec<Intersection>> {
@@ -207,7 +207,7 @@ mod tests {
 
             let xs = cyl.local_intersect(&r);
 
-            assert_eq!(xs, None);
+            assert!(xs.is_none());
         }
     }
 

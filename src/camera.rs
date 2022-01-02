@@ -97,7 +97,6 @@ mod tests {
     use crate::material::Material;
     use crate::matrix::Matrix;
     use crate::shapes::sphere::Sphere;
-    use crate::shapes::Shape;
     use crate::tuple::Tuple;
     use crate::utils::fuzzy_equal::fuzzy_equal;
     use crate::world::World;
@@ -177,7 +176,7 @@ mod tests {
         );
         let s2 = Sphere::default().set_transform(Matrix::identity().scaling(0.5, 0.5, 0.5));
 
-        World::new(Some(light), vec![s1.into(), s2.into()])
+        World::new(Some(light), vec![Box::new(s1), Box::new(s2)])
     }
 
     #[test]

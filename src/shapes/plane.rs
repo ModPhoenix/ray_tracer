@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use uuid::Uuid;
 
 use crate::{
@@ -22,6 +24,16 @@ impl Plane {
             material,
         }
     }
+
+    pub fn set_material(&mut self, material: Material) -> Self {
+        self.material = material;
+        self.clone()
+    }
+
+    pub fn set_transform(&mut self, transform: Matrix<4>) -> Self {
+        self.transform = transform;
+        self.clone()
+    }
 }
 
 impl Default for Plane {
@@ -39,22 +51,12 @@ impl Shape for Plane {
         self.material.clone()
     }
 
-    fn set_material(&mut self, material: Material) -> Self {
-        self.material = material;
-        self.clone()
-    }
-
     fn get_transform(&self) -> Matrix<4> {
         self.transform.clone()
     }
 
-    fn set_transform(&mut self, transform: Matrix<4>) -> Self {
-        self.transform = transform;
-        self.clone()
-    }
-
     fn intersection(&self, t: f64) -> Intersection {
-        Intersection::new(t, self.clone().into())
+        Intersection::new(t, Rc::new(self.clone()))
     }
 
     fn local_intersect(&self, ray: &crate::ray::Ray) -> Option<Vec<Intersection>> {
@@ -101,7 +103,7 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 10., 0.), Tuple::vector(0., 0., 1.));
         let xs = p.local_intersect(&r);
 
-        assert_eq!(xs, None);
+        assert!(xs.is_none());
     }
 
     #[test]
@@ -111,7 +113,7 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 0., 0.), Tuple::vector(0., 0., 1.));
         let xs = p.local_intersect(&r);
 
-        assert_eq!(xs, None);
+        assert!(xs.is_none());
     }
 
     #[test]
@@ -121,9 +123,9 @@ mod tests {
         let r = Ray::new(Tuple::point(0., 1., 0.), Tuple::vector(0., -1., 0.));
         let xs = p.local_intersect(&r);
 
-        assert_eq!(xs.clone().unwrap().len(), 1);
-        assert_eq!(xs.clone().unwrap()[0].t, 1.);
-        assert_eq!(xs.unwrap()[0].object, p.into());
+        assert_eq!(xs.as_ref().unwrap().len(), 1);
+        assert_eq!(xs.as_ref().unwrap()[0].t, 1.);
+        assert_eq!(xs.unwrap()[0].object.id(), p.id());
     }
 
     #[test]
@@ -133,8 +135,8 @@ mod tests {
         let r = Ray::new(Tuple::point(0., -1., 0.), Tuple::vector(0., 1., 0.));
         let xs = p.local_intersect(&r);
 
-        assert_eq!(xs.clone().unwrap().len(), 1);
-        assert_eq!(xs.clone().unwrap()[0].t, 1.);
-        assert_eq!(xs.unwrap()[0].object, p.into());
+        assert_eq!(xs.as_ref().unwrap().len(), 1);
+        assert_eq!(xs.as_ref().unwrap()[0].t, 1.);
+        assert_eq!(xs.unwrap()[0].object.id(), p.id());
     }
 }

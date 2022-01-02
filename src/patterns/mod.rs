@@ -1,9 +1,6 @@
-use crate::{
-    color::Color,
-    matrix::Matrix,
-    shapes::{Shape, Shapes},
-    tuple::Tuple,
-};
+use std::rc::Rc;
+
+use crate::{color::Color, matrix::Matrix, shapes::Shape, tuple::Tuple};
 
 pub mod checkers;
 pub mod gradient;
@@ -20,7 +17,7 @@ pub trait Pattern {
     fn set_transform(&mut self, transform: Matrix<4>) -> Self;
 
     fn pattern_at(&self, point: Tuple) -> Color;
-    fn pattern_at_shape(&self, object: Shapes, world_point: Tuple) -> Color {
+    fn pattern_at_shape(&self, object: Rc<dyn Shape>, world_point: Tuple) -> Color {
         let object_point = object.get_transform().inverse() * world_point;
         let pattern_point = self.get_transform().inverse() * object_point;
 
