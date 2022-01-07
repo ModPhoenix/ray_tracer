@@ -12,7 +12,7 @@ use ray_tracer::{
     world::World,
 };
 
-fn main() -> std::io::Result<()> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mirror_material = Material::default()
         .set_color(RGB::new(0, 0, 0).into())
         .set_specular(0.2)
@@ -197,7 +197,7 @@ fn main() -> std::io::Result<()> {
     // 4K - 3840 × 2160
     // 8K - 7680 × 4320
 
-    let camera = Camera::new(3840, 2160, PI / 3.).set_transform(Matrix::identity().view_transform(
+    let camera = Camera::new(5, 5, PI / 3.).set_transform(Matrix::identity().view_transform(
         Tuple::point(-2., 1.5, -5.),
         Tuple::point(0., 1., 0.),
         Tuple::vector(0., 1., 0.),
