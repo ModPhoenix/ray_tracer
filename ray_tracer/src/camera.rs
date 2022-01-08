@@ -1,6 +1,6 @@
 use crate::{canvas::Canvas, matrix::Matrix, ray::Ray, tuple::Tuple, world::World};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Camera {
     hsize: usize,
     vsize: usize,

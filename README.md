@@ -35,6 +35,14 @@ cargo run --release
 open scene.png
 ```
 
+## Ideas
+
+- [ ] Scene loader from yaml config file
+- [ ] Compile into WASM and run in the Web
+- [ ] CLI
+- [ ] Make rendering multithreaded
+- [ ] Performance improvements and refactoring
+
 ## Progress in the book
 
 - [x] Chapter 01: Tuples, Points, and Vectors

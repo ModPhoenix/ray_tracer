@@ -10,3 +10,6 @@ ray_tracer = { path = "../ray_tracer" }
 
 serde = "1.0"
 serde_yaml = "0.8"
+anyhow = "1.0"
+
+image = { version = "0.23.14", features = ["pnm", "png"] }

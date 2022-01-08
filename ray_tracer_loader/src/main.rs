@@ -1,20 +1,19 @@
 use serde_yaml::Value;
 
+use ray_tracer_loader::parse_config;
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let f = std::fs::File::open("world.yaml")?;
 
-    let d: Value = serde_yaml::from_reader(f)?;
+    let config: Value = serde_yaml::from_reader(f)?;
 
-    match d {
-        Value::Null => todo!(),
-        Value::Bool(_) => todo!(),
-        Value::Number(_) => todo!(),
-        Value::String(_) => todo!(),
-        Value::Sequence(v) => {
-            println!("Read YAML: {:#?}", v);
-        }
-        Value::Mapping(_) => todo!(),
-    };
+    let (camera, world) = parse_config(config)?;
+
+    let canvas = camera.render(world);
+
+    let img = image::load_from_memory(&canvas.to_ppm().as_bytes()).unwrap();
+
+    img.save("scene.png").unwrap();
 
     Ok(())
 }

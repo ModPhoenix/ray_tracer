@@ -17,6 +17,16 @@ impl World {
         Self { light, objects }
     }
 
+    /// Get a reference to the world's light.
+    pub fn light(&self) -> Option<&Light> {
+        self.light.as_ref()
+    }
+
+    /// Get a reference to the world's objects.
+    pub fn objects(&self) -> &[Box<dyn Shape>] {
+        self.objects.as_ref()
+    }
+
     pub fn set_light(mut self, light: Light) -> Self {
         self.light = Some(light);
 
