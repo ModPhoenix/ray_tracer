@@ -1,4 +1,9 @@
-use ray_tracer::{color::Color, material::Material, matrix::Matrix};
+use ray_tracer::{
+    color::Color,
+    material::Material,
+    matrix::Matrix,
+    patterns::{checkers::Checkers, gradient::Gradient, ring::Ring, stripe::Stripe, Patterns},
+};
 use serde_yaml::{Mapping, Value};
 
 pub fn get_value_by_key<'a>(config: &'a Mapping, key: &str) -> Option<&'a Value> {
@@ -57,6 +62,45 @@ pub fn get_transform(shape_config: &Mapping) -> Option<Matrix<4>> {
     Some(matrix)
 }
 
+fn get_pattern(pattern_config: &Mapping) -> Option<Patterns> {
+    let pattern_type = get_value_by_key(pattern_config, "type")?.as_str()?;
+    let colors = get_value_by_key(pattern_config, "colors")?.as_sequence()?;
+    let color1 = as_vec_f64(colors[0].as_sequence()?)?;
+    let color2 = as_vec_f64(colors[1].as_sequence()?)?;
+
+    match pattern_type {
+        "checkers" => Some(
+            Checkers::new(
+                Color::new(color1[0], color1[1], color1[2]),
+                Color::new(color2[0], color2[1], color2[2]),
+            )
+            .into(),
+        ),
+        "gradient" => Some(
+            Gradient::new(
+                Color::new(color1[0], color1[1], color1[2]),
+                Color::new(color2[0], color2[1], color2[2]),
+            )
+            .into(),
+        ),
+        "ring" => Some(
+            Ring::new(
+                Color::new(color1[0], color1[1], color1[2]),
+                Color::new(color2[0], color2[1], color2[2]),
+            )
+            .into(),
+        ),
+        "stripe" => Some(
+            Stripe::new(
+                Color::new(color1[0], color1[1], color1[2]),
+                Color::new(color2[0], color2[1], color2[2]),
+            )
+            .into(),
+        ),
+        _ => None,
+    }
+}
+
 pub fn get_material(shape_config: &Mapping) -> Option<Material> {
     let mapping = get_value_by_key(shape_config, "material")?.as_mapping()?;
 
@@ -64,6 +108,11 @@ pub fn get_material(shape_config: &Mapping) -> Option<Material> {
 
     for (key, value) in mapping.iter() {
         match key.as_str()? {
+            "pattern" => {
+                let pattern = get_pattern(value.as_mapping()?)?;
+
+                material = material.set_pattern(pattern);
+            }
             "color" => {
                 let color = as_vec_f64(value.as_sequence()?)?;
                 material = material.set_color(Color::new(color[0], color[1], color[2]));
@@ -98,7 +147,9 @@ pub fn get_material(shape_config: &Mapping) -> Option<Material> {
 
 #[cfg(test)]
 mod tests {
-    use ray_tracer::{color::Color, material::Material, matrix::Matrix};
+    use ray_tracer::{
+        color::Color, material::Material, matrix::Matrix, patterns::checkers::Checkers,
+    };
     use serde_yaml::Value;
 
     use crate::utils::{get_material, get_transform, get_value_by_key, get_vec_f64_from_sequence};
@@ -216,6 +267,41 @@ material:
                     .set_reflective(0.9)
                     .set_transparency(0.9)
                     .set_refractive_index(1.5)
+            )
+        );
+    }
+
+    #[test]
+    fn get_material_with_pattern_works() {
+        let yaml = r#"
+add: sphere
+transform:
+    - [scale, 0.5, 0.5, 0.5]
+    - [translate, -0.7, 0.5, -0.8]
+material:
+    pattern:
+        type: checkers
+        colors:
+        - [0.35, 0.35, 0.35]
+        - [0.65, 0.65, 0.65]
+    specular: 0
+    reflective: 0.4"#;
+
+        let config: Value = serde_yaml::from_str(yaml).unwrap();
+        let config_mapping = config.as_mapping().unwrap();
+
+        let result = get_material(config_mapping);
+
+        assert_eq!(
+            result,
+            Some(
+                Material::default()
+                    .set_specular(0.)
+                    .set_reflective(0.4)
+                    .set_pattern(
+                        Checkers::new(Color::new(0.35, 0.35, 0.35), Color::new(0.65, 0.65, 0.65))
+                            .into()
+                    )
             )
         );
     }

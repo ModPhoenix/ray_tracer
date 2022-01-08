@@ -6,7 +6,7 @@ use ray_tracer::{
     light::Light,
     material::Material,
     matrix::Matrix,
-    shapes::{plane::Plane, sphere::Sphere, Shape},
+    shapes::{cone::Cone, cube::Cube, cylinder::Cylinder, plane::Plane, sphere::Sphere, Shape},
     tuple::Tuple,
     world::World,
 };
@@ -36,13 +36,12 @@ pub fn parse_config(config: Value) -> Result<(Camera, World)> {
                         "light" => {
                             light = get_light_from_config(&command);
                         }
-                        "plane" | "sphere" => {
+                        _ => {
                             objects.push(
                                 get_shape_from_config(&command)
                                     .context("Can't parse shape from config")?,
                             );
                         }
-                        _ => {}
                     }
                 }
             }
@@ -106,9 +105,15 @@ fn get_shape_from_config(config: &Mapping) -> Option<Box<dyn Shape>> {
     let material = get_material(config);
 
     let shape: Option<Box<dyn Shape>> = match variant {
-        "plane" => Some(Box::new(generate_shape::<Plane>(transform, material))),
         "sphere" => Some(Box::new(generate_shape::<Sphere>(transform, material))),
-        _ => None,
+        "plane" => Some(Box::new(generate_shape::<Plane>(transform, material))),
+        "cube" => Some(Box::new(generate_shape::<Cube>(transform, material))),
+        "cylinder" => Some(Box::new(generate_shape::<Cylinder>(transform, material))),
+        "cone" => Some(Box::new(generate_shape::<Cone>(transform, material))),
+        _ => {
+            println!("miss variant: {}", variant);
+            None
+        }
     };
 
     shape
@@ -149,6 +154,14 @@ mod tests {
       - [translate, 4.6, 0.4, 1]
     material:
       color: [0.8, 0.5, 0.3]
+      shininess: 50
+
+  - add: cube
+    transform:
+      - [scale, 0.4, 0.4, 0.4]
+      - [translate, 4.6, 0.4, 1]
+    material:
+      color: [0.8, 0.5, 0.3]
       shininess: 50"#;
 
         let config: Value = serde_yaml::from_str(yaml).unwrap();
@@ -165,7 +178,7 @@ mod tests {
 
         assert_eq!(camera, expected_camera);
         assert_eq!(world.light(), Some(&expected_light));
-        assert_eq!(world.objects().len(), 2);
+        assert_eq!(world.objects().len(), 3);
     }
 
     #[test]
