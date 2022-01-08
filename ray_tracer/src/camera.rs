@@ -78,7 +78,7 @@ impl Camera {
         for y in 0..self.vsize {
             for x in 0..self.hsize {
                 let ray = self.ray_for_pixel(x, y);
-                let color = world.color_at(&ray, 20);
+                let color = world.color_at(&ray, 10);
 
                 image.set(x, y, &color);
             }

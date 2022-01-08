@@ -1,4 +1,4 @@
-use ray_tracer::matrix::Matrix;
+use ray_tracer::{color::Color, material::Material, matrix::Matrix};
 use serde_yaml::{Mapping, Value};
 
 pub fn get_value_by_key<'a>(config: &'a Mapping, key: &str) -> Option<&'a Value> {
@@ -57,12 +57,51 @@ pub fn get_transform(shape_config: &Mapping) -> Option<Matrix<4>> {
     Some(matrix)
 }
 
+pub fn get_material(shape_config: &Mapping) -> Option<Material> {
+    let mapping = get_value_by_key(shape_config, "material")?.as_mapping()?;
+
+    let mut material = Material::default();
+
+    for (key, value) in mapping.iter() {
+        match key.as_str()? {
+            "color" => {
+                let color = as_vec_f64(value.as_sequence()?)?;
+                material = material.set_color(Color::new(color[0], color[1], color[2]));
+            }
+            "ambient" => {
+                material = material.set_ambient(value.as_f64()?);
+            }
+            "diffuse" => {
+                material = material.set_diffuse(value.as_f64()?);
+            }
+            "specular" => {
+                material = material.set_specular(value.as_f64()?);
+            }
+            "shininess" => {
+                material = material.set_shininess(value.as_f64()?);
+            }
+            "reflective" => {
+                material = material.set_reflective(value.as_f64()?);
+            }
+            "transparency" => {
+                material = material.set_transparency(value.as_f64()?);
+            }
+            "refractive-index" => {
+                material = material.set_refractive_index(value.as_f64()?);
+            }
+            _ => {}
+        }
+    }
+
+    Some(material)
+}
+
 #[cfg(test)]
 mod tests {
-    use ray_tracer::matrix::Matrix;
+    use ray_tracer::{color::Color, material::Material, matrix::Matrix};
     use serde_yaml::Value;
 
-    use crate::utils::{get_transform, get_value_by_key, get_vec_f64_from_sequence};
+    use crate::utils::{get_material, get_transform, get_value_by_key, get_vec_f64_from_sequence};
 
     #[test]
     fn get_value_by_key_works() {
@@ -141,5 +180,43 @@ transform:
         let result = get_transform(config_mapping);
 
         assert!(result.is_none());
+    }
+
+    #[test]
+    fn get_material_works() {
+        let yaml = r#"
+add: sphere
+transform:
+    - [scale, 0.5, 0.5, 0.5]
+    - [translate, -0.7, 0.5, -0.8]
+material:
+    color: [0, 0.2, 0]
+    ambient: 0
+    diffuse: 0.4
+    specular: 0.9
+    shininess: 300
+    reflective: 0.9
+    transparency: 0.9
+    refractive-index: 1.5"#;
+
+        let config: Value = serde_yaml::from_str(yaml).unwrap();
+        let config_mapping = config.as_mapping().unwrap();
+
+        let result = get_material(config_mapping);
+
+        assert_eq!(
+            result,
+            Some(
+                Material::default()
+                    .set_color(Color::new(0., 0.2, 0.))
+                    .set_ambient(0.)
+                    .set_diffuse(0.4)
+                    .set_specular(0.9)
+                    .set_shininess(300.)
+                    .set_reflective(0.9)
+                    .set_transparency(0.9)
+                    .set_refractive_index(1.5)
+            )
+        );
     }
 }

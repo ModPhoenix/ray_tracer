@@ -4,13 +4,14 @@ use ray_tracer::{
     camera::Camera,
     color::Color,
     light::Light,
+    material::Material,
     matrix::Matrix,
     shapes::{plane::Plane, sphere::Sphere, Shape},
     tuple::Tuple,
     world::World,
 };
 use serde_yaml::{Mapping, Value};
-use utils::{get_value_by_key, get_vec_f64_from_sequence};
+use utils::{get_material, get_value_by_key, get_vec_f64_from_sequence};
 
 use crate::utils::get_transform;
 
@@ -82,11 +83,18 @@ fn get_light_from_config(config: &Mapping) -> Option<Light> {
     ))
 }
 
-fn generate_shape<T: Shape + Default>(transform: Option<Matrix<4>>) -> T {
+fn generate_shape<T: Shape + Default>(
+    transform: Option<Matrix<4>>,
+    material: Option<Material>,
+) -> T {
     let mut shape = T::default();
 
     if let Some(transform) = transform {
         shape.set_transform(transform);
+    }
+
+    if let Some(material) = material {
+        shape.set_material(material);
     }
 
     shape
@@ -95,10 +103,11 @@ fn generate_shape<T: Shape + Default>(transform: Option<Matrix<4>>) -> T {
 fn get_shape_from_config(config: &Mapping) -> Option<Box<dyn Shape>> {
     let variant = get_value_by_key(config, "add")?.as_str()?;
     let transform = get_transform(config);
+    let material = get_material(config);
 
     let shape: Option<Box<dyn Shape>> = match variant {
-        "plane" => Some(Box::new(generate_shape::<Plane>(transform))),
-        "sphere" => Some(Box::new(generate_shape::<Sphere>(transform))),
+        "plane" => Some(Box::new(generate_shape::<Plane>(transform, material))),
+        "sphere" => Some(Box::new(generate_shape::<Sphere>(transform, material))),
         _ => None,
     };
 
