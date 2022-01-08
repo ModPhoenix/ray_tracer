@@ -15,9 +15,13 @@ pub trait Shape: Debug {
     fn id(&self) -> Uuid;
     // materials
     fn get_material(&self) -> Material;
+    /// Set the Shape's material.
+    fn set_material(&mut self, material: Material);
 
     // transform
     fn get_transform(&self) -> Matrix<4>;
+    /// Set the Shape's transform.
+    fn set_transform(&mut self, transform: Matrix<4>);
 
     // intersection
     fn intersection(&self, t: f64) -> Intersection;

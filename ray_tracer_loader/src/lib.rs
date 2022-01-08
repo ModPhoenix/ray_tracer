@@ -12,6 +12,8 @@ use ray_tracer::{
 use serde_yaml::{Mapping, Value};
 use utils::{get_value_by_key, get_vec_f64_from_sequence};
 
+use crate::utils::get_transform;
+
 mod utils;
 
 pub fn parse_config(config: Value) -> Result<(Camera, World)> {
@@ -51,7 +53,7 @@ pub fn parse_config(config: Value) -> Result<(Camera, World)> {
     Ok((camera.context("Camera is required")?, world))
 }
 
-pub fn get_camera_from_config(config: &Mapping) -> Option<Camera> {
+fn get_camera_from_config(config: &Mapping) -> Option<Camera> {
     let width = get_value_by_key(config, "width")?.as_i64()?;
     let height = get_value_by_key(config, "height")?.as_i64()?;
     let field_of_view = get_value_by_key(config, "field-of-view")?.as_f64()?;
@@ -70,7 +72,7 @@ pub fn get_camera_from_config(config: &Mapping) -> Option<Camera> {
     )
 }
 
-pub fn get_light_from_config(config: &Mapping) -> Option<Light> {
+fn get_light_from_config(config: &Mapping) -> Option<Light> {
     let position = get_vec_f64_from_sequence(config, "position")?;
     let intensity = get_vec_f64_from_sequence(config, "intensity")?;
 
@@ -80,16 +82,27 @@ pub fn get_light_from_config(config: &Mapping) -> Option<Light> {
     ))
 }
 
-pub fn get_shape_from_config(config: &Mapping) -> Option<Box<dyn Shape>> {
-    let shape = get_value_by_key(config, "add")?.as_str()?;
+fn generate_shape<T: Shape + Default>(transform: Option<Matrix<4>>) -> T {
+    let mut shape = T::default();
 
-    println!("shape: {}", shape);
-
-    match shape {
-        "plane" => Some(Box::new(Plane::default())),
-        "sphere" => Some(Box::new(Sphere::default())),
-        _ => None,
+    if let Some(transform) = transform {
+        shape.set_transform(transform);
     }
+
+    shape
+}
+
+fn get_shape_from_config(config: &Mapping) -> Option<Box<dyn Shape>> {
+    let variant = get_value_by_key(config, "add")?.as_str()?;
+    let transform = get_transform(config);
+
+    let shape: Option<Box<dyn Shape>> = match variant {
+        "plane" => Some(Box::new(generate_shape::<Plane>(transform))),
+        "sphere" => Some(Box::new(generate_shape::<Sphere>(transform))),
+        _ => None,
+    };
+
+    shape
 }
 
 #[cfg(test)]
