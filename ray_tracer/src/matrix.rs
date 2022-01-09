@@ -219,6 +219,18 @@ impl Matrix<3> {
     }
 }
 
+impl<const D: usize> Default for Matrix<D> {
+    fn default() -> Self {
+        let mut result = Self::new();
+
+        for n in 0..D {
+            result[n][n] = 1.;
+        }
+
+        result
+    }
+}
+
 impl Matrix<2> {
     fn determinant(&self) -> f64 {
         self[0][0] * self[1][1] - self[0][1] * self[1][0]

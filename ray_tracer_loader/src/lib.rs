@@ -73,7 +73,7 @@ fn get_camera_from_config(config: &Mapping) -> Option<Camera> {
 }
 
 fn get_light_from_config(config: &Mapping) -> Option<Light> {
-    let position = get_vec_f64_from_sequence(config, "position")?;
+    let position = get_vec_f64_from_sequence(config, "at")?;
     let intensity = get_vec_f64_from_sequence(config, "intensity")?;
 
     Some(Light::new(
@@ -138,7 +138,7 @@ mod tests {
     up: [0, 1, 0]
 
   - add: light
-    position: [-4.9, 4.9, -1]
+    at: [-4.9, 4.9, -1]
     intensity: [1, 1, 1]
 
   - add: plane

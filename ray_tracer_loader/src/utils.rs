@@ -2,7 +2,9 @@ use ray_tracer::{
     color::Color,
     material::Material,
     matrix::Matrix,
-    patterns::{checkers::Checkers, gradient::Gradient, ring::Ring, stripe::Stripe, Patterns},
+    patterns::{
+        checkers::Checkers, gradient::Gradient, ring::Ring, stripe::Stripe, Pattern, Patterns,
+    },
 };
 use serde_yaml::{Mapping, Value};
 
@@ -64,11 +66,12 @@ pub fn get_transform(shape_config: &Mapping) -> Option<Matrix<4>> {
 
 fn get_pattern(pattern_config: &Mapping) -> Option<Patterns> {
     let pattern_type = get_value_by_key(pattern_config, "type")?.as_str()?;
+    let transform = get_transform(pattern_config);
     let colors = get_value_by_key(pattern_config, "colors")?.as_sequence()?;
     let color1 = as_vec_f64(colors[0].as_sequence()?)?;
     let color2 = as_vec_f64(colors[1].as_sequence()?)?;
 
-    match pattern_type {
+    let pattern: Option<Patterns> = match pattern_type {
         "checkers" => Some(
             Checkers::new(
                 Color::new(color1[0], color1[1], color1[2]),
@@ -98,7 +101,15 @@ fn get_pattern(pattern_config: &Mapping) -> Option<Patterns> {
             .into(),
         ),
         _ => None,
+    };
+
+    let mut pattern = pattern?;
+
+    if let Some(transform) = transform {
+        pattern.set_transform(transform);
     }
+
+    Some(pattern)
 }
 
 pub fn get_material(shape_config: &Mapping) -> Option<Material> {
