@@ -2,7 +2,7 @@ use crate::{color::Color, matrix::Matrix, tuple::Tuple};
 
 use super::Pattern;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Checkers {
     a: Color,
     b: Color,

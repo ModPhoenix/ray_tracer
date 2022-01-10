@@ -125,8 +125,16 @@ impl Shape for Cylinder {
         self.material.clone()
     }
 
+    fn set_material(&mut self, material: Material) {
+        self.material = material;
+    }
+
     fn get_transform(&self) -> Matrix<4> {
         self.transform.clone()
+    }
+
+    fn set_transform(&mut self, transform: Matrix<4>) {
+        self.transform = transform;
     }
 
     fn intersection(&self, t: f64) -> Intersection {

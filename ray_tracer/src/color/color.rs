@@ -4,7 +4,7 @@ use crate::utils::fuzzy_equal::fuzzy_equal;
 
 use super::RGB;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Color {
     red: f64,
     green: f64,
