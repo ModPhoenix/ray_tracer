@@ -2,4 +2,5 @@
 members = [
     "ray_tracer",
     "ray_tracer_loader",
+    "ray_tracer_web",
 ]

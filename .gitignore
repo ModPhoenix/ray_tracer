@@ -1,4 +1,5 @@
 /target
+/ray_tracer_web/dist
 
 scene.png
 .DS_Store
