@@ -1,6 +1,6 @@
 use crate::color::{Color, RGB};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Canvas {
     pub width: usize,
     pub height: usize,

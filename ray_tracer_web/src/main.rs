@@ -1,44 +1,57 @@
+use ray_tracer_loader::parse_config;
+use serde_yaml::Value;
+use web_sys::{console, HtmlTextAreaElement};
 use yew::prelude::*;
+use yew::{function_component, html, use_state, Callback};
 
-enum Msg {
-    AddOne,
-}
+#[function_component(App)]
+pub fn header_input() -> Html {
+    let base64 = use_state(|| "".to_owned());
 
-struct Model {
-    value: i64,
-}
+    let onkeypress = {
+        let base64 = base64.clone();
+        Callback::from(move |event: KeyboardEvent| {
+            let input: HtmlTextAreaElement = event.target_unchecked_into();
+            let yaml = input.value();
 
-impl Component for Model {
-    type Message = Msg;
-    type Properties = ();
+            let config: Result<Value, serde_yaml::Error> = serde_yaml::from_str(&*yaml);
 
-    fn create(_ctx: &Context<Self>) -> Self {
-        Self { value: 0 }
-    }
+            match config {
+                Ok(config) => match parse_config(config) {
+                    Ok((camera, world)) => {
+                        let canvas = camera.render(world);
 
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            Msg::AddOne => {
-                self.value += 1;
-                // the value has changed so we need to
-                // re-render for it to appear on the page
-                true
-            }
-        }
-    }
+                        let img = image::load_from_memory(&canvas.to_ppm().as_bytes()).unwrap();
 
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        // This gives us a component's "`Scope`" which allows us to send messages, etc to the component.
-        let link = ctx.link();
-        html! {
-            <div>
-                <button onclick={link.callback(|_| Msg::AddOne)}>{ "+1" }</button>
-                <p>{ self.value }</p>
-            </div>
-        }
+                        console::log_1(&format!("img: {:#?}", img).into());
+
+                        let mut buf = vec![];
+                        img.write_to(&mut buf, image::ImageOutputFormat::Png)
+                            .unwrap();
+                        let res_base64 = base64::encode(&buf);
+
+                        base64.set(format!("data:image/png;base64,{}", res_base64));
+                    }
+                    Err(_) => {}
+                },
+                Err(_) => {}
+            };
+        })
+    };
+
+    html! {
+        <div>
+            <textarea
+                class="yaml-config"
+                placeholder="Yaml scene config"
+                {onkeypress}
+            />
+            <img src={ (*base64).clone() } alt="Scene" />
+        </div>
+
     }
 }
 
 fn main() {
-    yew::start_app::<Model>();
+    yew::start_app::<App>();
 }

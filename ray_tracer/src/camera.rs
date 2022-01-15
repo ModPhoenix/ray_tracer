@@ -72,6 +72,30 @@ impl Camera {
         Ray::new(origin, direction)
     }
 
+    #[cfg(feature = "parallel")]
+    pub fn render(&self, world: World) -> Canvas {
+        use rayon::prelude::*;
+        use std::sync::{Arc, Mutex};
+
+        fn unwrap_arc_mutex<T: Default>(x: Arc<Mutex<T>>) -> T {
+            std::mem::take(&mut x.lock().unwrap())
+        }
+
+        let image = Arc::new(Mutex::new(Canvas::new(self.hsize, self.vsize)));
+
+        for y in 0..self.vsize {
+            (0..self.hsize).into_par_iter().for_each(|x| {
+                let ray = self.ray_for_pixel(x, y);
+                let color = world.color_at(&ray, 10);
+
+                image.lock().unwrap().set(x, y, &color);
+            })
+        }
+
+        unwrap_arc_mutex(image)
+    }
+
+    #[cfg(not(feature = "parallel"))]
     pub fn render(&self, world: World) -> Canvas {
         let mut image = Canvas::new(self.hsize, self.vsize);
 

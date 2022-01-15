@@ -11,7 +11,7 @@ pub mod cylinder;
 pub mod plane;
 pub mod sphere;
 
-pub trait Shape: Debug {
+pub trait Shape: Sync + Debug {
     fn id(&self) -> Uuid;
     // materials
     fn get_material(&self) -> Material;
